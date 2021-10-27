@@ -27,7 +27,7 @@ extern "C"{
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 #include <libavdevice/avdevice.h>
-
+#include <libavutil/imgutils.h>
 };
 
 #include <stdio.h>
@@ -144,8 +144,10 @@ int main(int argc, char *argv[]) {
     return -1;
 
   // Determine required buffer size and allocate buffer
-  numBytes=avpicture_get_size(AV_PIX_FMT_RGB24, pCodecCtx->width,
-			      pCodecCtx->height);
+  numBytes=av_image_get_buffer_size(AV_PIX_FMT_RGB24, pCodecCtx->width,
+			      pCodecCtx->height,16);
+
+
   buffer=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
 
   // Assign appropriate parts of buffer to image planes in pFrameRGB
