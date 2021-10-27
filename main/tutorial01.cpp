@@ -153,8 +153,13 @@ int main(int argc, char *argv[]) {
   // Assign appropriate parts of buffer to image planes in pFrameRGB
   // Note that pFrameRGB is an AVFrame, but AVFrame is a superset
   // of AVPicture
-  avpicture_fill((AVPicture *)pFrameRGB, buffer, AV_PIX_FMT_RGB24,
-		 pCodecCtx->width, pCodecCtx->height);
+ // avpicture_fill((AVPicture *)pFrameRGB, buffer, AV_PIX_FMT_RGB24,
+	//	 pCodecCtx->width, pCodecCtx->height);
+
+  av_image_fill_arrays(pFrameRGB->data,pFrameRGB->linesize
+                       , buffer, AV_PIX_FMT_RGB24,
+                         pCodecCtx->width, pCodecCtx->height,16);
+
 
   // initialize SWS context for software scaling
   sws_ctx = sws_getContext(pCodecCtx->width,
