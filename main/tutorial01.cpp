@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   // Register all formats and codecs
-    avdevice_register_all(); //dd
+    av_register_all(); //dd
 
   // Open video file
   if(avformat_open_input(&pFormatCtx, argv[1], NULL, NULL)!=0)
@@ -197,7 +197,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Free the packet that was allocated by av_read_frame
-    av_free_packet(&packet);
+    //av_free_packet(&packet);
+    av_packet_unref(&packet);
   }
 
   // Free the RGB image
