@@ -22,12 +22,13 @@
 //
 // to write the first five frames from "myvideofile.mpg" to disk in PPM
 // format.
-
+extern "C"{
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 #include <libavdevice/avdevice.h>
 
+};
 
 #include <stdio.h>
 
