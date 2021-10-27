@@ -28,6 +28,7 @@
 #include <libswscale/swscale.h>
 #include <libavdevice/avdevice.h>
 
+
 #include <stdio.h>
 
 // compatibility with newer API
@@ -78,10 +79,10 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   // Register all formats and codecs
-  avdevice_register_all();
+    avdevice_register_all();
 
   // Open video file
-  if(avformat_open_input(&pFormatCtx, ":0.0", NULL, NULL)!=0)
+  if(avformat_open_input(&pFormatCtx, argv[1], NULL, NULL)!=0)
     return -1; // Couldn't open file
 
   // Retrieve stream information
