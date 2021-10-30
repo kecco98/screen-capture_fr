@@ -52,6 +52,7 @@ class ScreenCapture
 private:
     AVFormatContext *pAVFormatContext;
     AVInputFormat *pAVInputFormat;
+    AVDictionary *options;
 
 public:
 
