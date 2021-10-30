@@ -69,14 +69,14 @@ int ScreenCapture::setup(const char* start, const char* output_file)
     pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
 
 
-    pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);
+    pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);//trova il codec
     if( pAVCodec == NULL )
     {
         cout<<"\nunable to find the decoder";
         exit(1);
     }
 
-    //Initialize the AVCodecContext to use the given AVCodec.
+    //Initialize the AVCodecContext to use the given AVCodec. ,copia info codec in ctx
     if( avcodec_open2(pAVCodecContext , pAVCodec , NULL) < 0 )
     {
         cout<<"\nUnable to open the av codec"<<endl;
