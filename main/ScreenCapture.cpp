@@ -31,7 +31,7 @@ int ScreenCapture::setup(const char* start)
     pAVInputFormat = av_find_input_format("x11grab");
     cout<<start;
 
-    if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, NULL) != 0) {
+    if(avformat_open_input(&pAVFormatContext, start, pAVInputFormat, NULL) != 0) {
         cout<<"Error in opening the input device!";
         exit(1);
     }
