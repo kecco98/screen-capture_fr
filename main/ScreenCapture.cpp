@@ -76,8 +76,8 @@ int ScreenCapture::setup(const char* start)
         exit(1);
     }
 
-    value = avcodec_open2(pAVCodecContext , pAVCodec , NULL);//Initialize the AVCodecContext to use the given AVCodec.
-    if( value < 0 )
+    //Initialize the AVCodecContext to use the given AVCodec.
+    if( avcodec_open2(pAVCodecContext , pAVCodec , NULL) < 0 )
     {
         cout<<"\nunable to open the av codec";
         exit(1);

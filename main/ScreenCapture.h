@@ -54,6 +54,7 @@ private:
     AVInputFormat *pAVInputFormat;
     AVDictionary *options;
     AVCodecContext *pAVCodecContext;
+    AVCodec *pAVCodec;
 
     int VideoStreamIndx;
 
