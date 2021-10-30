@@ -39,4 +39,12 @@ int ScreenCapture::setup(const char* start)
         exit(2);
     }
 
+
+/*    if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) da fare forse per il pausa e riprendi
+    {
+        cout<<"\nunable to find the stream information";
+        exit(1);
+    }*/
+
+
 }
