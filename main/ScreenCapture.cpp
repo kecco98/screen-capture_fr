@@ -66,5 +66,9 @@ int ScreenCapture::setup(const char* start)
         cout<<"\nunable to find the video stream index. (-1)";
         exit(1);
     }
+    // Saving video codec
+    pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
+
+
 
 }
