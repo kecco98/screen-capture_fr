@@ -3,18 +3,27 @@
 //
 
 #include "ScreenCapture.h"
+#include "cstring"
 
 using namespace std;
 
 /* driver function to run the application */
 int main()
 {
-    char start[4];
+    const char* start;
+    const char* output;
+    string in1, in2;
     cout<<"Insert the starting point!"<<endl;
-    cin >>start;
+    cin >>in1;
+    in1=":"+in1;
+    start=in1.c_str();
     ScreenCapture video_record;
+    cout<<"Insert the output patch!"<<endl;
+    cin >> in2;
+    output=in2.c_str();
 
-    video_record.setup(start);
+
+    video_record.setup(start, output);
 
     cout<<"Program executed successfully"<<endl;
 

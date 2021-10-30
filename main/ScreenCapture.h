@@ -55,6 +55,7 @@ private:
     AVDictionary *options;
     AVCodecContext *pAVCodecContext;
     AVCodec *pAVCodec;
+    AVFormatContext *outAVFormatContext;
 
     int VideoStreamIndx;
 
@@ -62,7 +63,7 @@ public:
 
     ScreenCapture();
     ~ScreenCapture();
-    int setup(const char* start);
+    int setup(const char* start, const char* output);
 
 
 };

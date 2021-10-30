@@ -19,7 +19,7 @@ ScreenCapture::~ScreenCapture(){
 }
 
 
-int ScreenCapture::setup(const char* start)
+int ScreenCapture::setup(const char* start, const char* output_file)
 {
     pAVFormatContext = NULL;
     options = NULL;
@@ -79,7 +79,16 @@ int ScreenCapture::setup(const char* start)
     //Initialize the AVCodecContext to use the given AVCodec.
     if( avcodec_open2(pAVCodecContext , pAVCodec , NULL) < 0 )
     {
-        cout<<"\nunable to open the av codec";
+        cout<<"\nUnable to open the av codec"<<endl;
+        exit(1);
+    }
+
+    //INIT
+
+    avformat_alloc_output_context2(&outAVFormatContext, NULL, NULL, output_file);
+    if (!outAVFormatContext)
+    {
+        cout<<"\nError in allocating av format output context"<<endl;
         exit(1);
     }
 
