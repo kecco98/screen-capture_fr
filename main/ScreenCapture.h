@@ -45,6 +45,8 @@ extern "C"
 
 #include "libswscale/swscale.h"
 
+#include <X11/Xlib.h>
+
 }
 
 class ScreenCapture
@@ -56,6 +58,11 @@ private:
     AVCodecContext *pAVCodecContext;
     AVCodec *pAVCodec;
     AVFormatContext *outAVFormatContext;
+    AVOutputFormat *output_format;
+    AVStream *video_st;
+    AVCodecContext *outAVCodecContext;
+    AVCodec *outAVCodec;
+
 
     int VideoStreamIndx;
 

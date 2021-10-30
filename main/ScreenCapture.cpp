@@ -92,4 +92,48 @@ int ScreenCapture::setup(const char* start, const char* output_file)
         exit(1);
     }
 
+    output_format = av_guess_format(NULL, output_file ,NULL);
+    if( !output_format )
+    {
+        cout<<"\nerror in guessing the video format. try with correct format";
+        exit(1);
+    }
+
+    video_st = avformat_new_stream(outAVFormatContext ,NULL);
+    if( !video_st )
+    {
+        cout<<"\nerror in creating a av format new stream";
+        exit(1);
+    }
+
+    outAVCodecContext = avcodec_alloc_context3(outAVCodec);//outAvCodec nullo cosi in auto sceflie il settaggio migliore per il ctx
+    if( !outAVCodecContext )
+    {
+        cout<<"\nerror in allocating the codec contexts";
+        exit(1);
+    }
+
+
+    /* set property of the video file */
+    outAVCodecContext = video_st->codec;
+    outAVCodecContext->codec_id = AV_CODEC_ID_MPEG4;// AV_CODEC_ID_MPEG4; // AV_CODEC_ID_H264 // AV_CODEC_ID_MPEG1VIDEO
+    outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
+    outAVCodecContext->pix_fmt  = AV_PIX_FMT_YUV420P;
+    outAVCodecContext->bit_rate = 400000; // 2500000
+    outAVCodecContext->width = 1920;
+    outAVCodecContext->height = 1080;
+    outAVCodecContext->gop_size = 3;
+    outAVCodecContext->max_b_frames = 2;
+    outAVCodecContext->time_base.num = 1;
+    outAVCodecContext->time_base.den = 30;
+
+    char *wid; Display *dpy; Window w;
+    int width, height, snum;
+    dpy = XOpenDisplay(0);
+
+    snum = DefaultScreen(dpy);
+    width = DisplayWidth(dpy, snum);
+    height = DisplayHeight(dpy, snum);
+    printf("display size is %d x %d\n", width, height);
+
 }

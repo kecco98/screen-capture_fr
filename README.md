@@ -18,3 +18,4 @@
     -thread di store del video
 
 -documentazione delle librerie
+-nome del file di uscita selezionabile 
