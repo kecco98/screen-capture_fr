@@ -58,7 +58,7 @@ public:
 
     ScreenCapture();
     ~ScreenCapture();
-    void setup(const char* start);
+    int setup(const char* start);
 
 
 };
