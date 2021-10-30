@@ -9,8 +9,10 @@ using namespace std;
 /* driver function to run the application */
 int main()
 {
-    char
-    ScreenCapture video_record(":0.0");
+    char *start = nullptr;
+    cout<<"Insert the starting point!"<<endl;
+    cin>> start;
+    ScreenCapture video_record(start);
 
 
     cout<<"\nprogram executed successfully\n";
