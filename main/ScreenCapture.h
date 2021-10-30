@@ -56,8 +56,9 @@ private:
 
 public:
 
-    ScreenCapture(const char* start);
+    ScreenCapture();
     ~ScreenCapture();
+    void setup(const char* start);
 
 
 };
