@@ -19,7 +19,7 @@ ScreenCapture::~ScreenCapture(){
 }
 
 
-int ScreenCapture::setup(const char* start, const char* output_file)
+int ScreenCapture::setup(const char* start, const char* output_file, int width, int height)
 {
     pAVFormatContext = NULL;
     options = NULL;
@@ -127,13 +127,13 @@ int ScreenCapture::setup(const char* start, const char* output_file)
     outAVCodecContext->time_base.num = 1;
     outAVCodecContext->time_base.den = 30;
 
-    char *wid; Display *dpy; Window w;
+   /* char *wid; Display *dpy; Window w;
     int width, height, snum;
     dpy = XOpenDisplay(0);
 
     snum = DefaultScreen(dpy);
     width = DisplayWidth(dpy, snum);
     height = DisplayHeight(dpy, snum);
-    printf("display size is %d x %d\n", width, height);
+    printf("display size is %d x %d\n", width, height);*/
 
 }
