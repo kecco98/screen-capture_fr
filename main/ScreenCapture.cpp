@@ -127,14 +127,14 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     outAVCodecContext->time_base.num = 1;
     outAVCodecContext->time_base.den = 30;
 
-   /* char *wid; Display *dpy; Window w;
-    int width, height, snum;
+  /* char *wid; Display *dpy; Window w;
+    int width2, height2, snum;
     dpy = XOpenDisplay(0);
 
     snum = DefaultScreen(dpy);
-    width = DisplayWidth(dpy, snum);
-    height = DisplayHeight(dpy, snum);
-    printf("display size is %d x %d\n", width, height);*/
+    width2 = DisplayWidth(dpy, snum);
+    height2 = DisplayHeight(dpy, snum);
+    printf("display size is %d x %d\n", width2, height2);*/
 
    //Per un altra codifica!!
  /*   if (codec_id == AV_CODEC_ID_H264)
@@ -142,11 +142,17 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
         av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
     }*/
 
-    outAVCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
+    outAVCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);//prenderlo da sopra!!!
     if( !outAVCodec )
     {
         cout<<"\nError in finding the av codecs. try again with correct codec"<<endl;
         exit(1);
     }
+
+
+
+
+
+
 
 }
