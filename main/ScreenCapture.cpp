@@ -9,7 +9,7 @@ using namespace std;
 ScreenCapture::ScreenCapture(){
 
     avdevice_register_all();
-    cout<<"\nall required functions are registered successfully";
+    cout<<"\nall required functions are registered successfully"<<endl;
 
 }
 
@@ -29,8 +29,6 @@ int ScreenCapture::setup(const char* start)
     pAVFormatContext = avformat_alloc_context();
     //Set screen as input device
     pAVInputFormat = av_find_input_format("x11grab");
-    cout<<start;
-
     if(avformat_open_input(&pAVFormatContext, start, pAVInputFormat, NULL) != 0) {
         cout<<"Error in opening the input device!";
         exit(1);
