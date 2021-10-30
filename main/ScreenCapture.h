@@ -54,6 +54,8 @@ private:
     AVInputFormat *pAVInputFormat;
     AVDictionary *options;
 
+    int VideoStreamIndx;
+
 public:
 
     ScreenCapture();
