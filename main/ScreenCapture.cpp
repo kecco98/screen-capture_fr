@@ -6,9 +6,21 @@
 
 using namespace std;
 
-ScreenCapture::ScreenCapture(const char* start){
+ScreenCapture::ScreenCapture(){
 
     avdevice_register_all();
+
+}
+
+ScreenCapture::~ScreenCapture(){
+
+
+
+}
+
+
+int ScreenCapture::setup(const char* start)
+{
     pAVFormatContext = NULL;
     options = NULL;
 
@@ -27,12 +39,4 @@ ScreenCapture::ScreenCapture(const char* start){
         exit(2);
     }
 
-    cout<<"Required functions registered successfully";
 }
-
-ScreenCapture::~ScreenCapture(){
-
-
-
-}
-
