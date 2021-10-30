@@ -81,9 +81,10 @@ int main(int argc, char *argv[]) {
   }
   // Register all formats and codecs
     avdevice_register_all(); //dd
+    pFormatCtx = avformat_alloc_context();
 
   // Open video file
-  if(avformat_open_input(&pFormatCtx, argv[1], NULL, NULL)!=0)
+  if(avformat_open_input(&pFormatCtx, ":0.0", av_find_input_format("x11grab"), NULL)!=0)  //forse 0.0
     return -1; // Couldn't open file
 
   // Retrieve stream information
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
     return -1; // Couldn't find stream information
 
   // Dump information about file onto standard error
-  av_dump_format(pFormatCtx, 0, argv[1], 0);
+  av_dump_format(pFormatCtx, 0, ":0.0", 0);
 
   // Find the first video stream
   videoStream=-1;
@@ -105,7 +106,8 @@ int main(int argc, char *argv[]) {
 
 
     // Find the decoder for the video stream
-  pCodec=avcodec_find_decoder(pCodecCtxOrig->codec_id);
+    pCodecCtx =pFormatCtx->streams[videoStream]->codec;
+  pCodec=avcodec_find_decoder(pCodecCtx->codec_id);
   if(pCodec==NULL) {
     fprintf(stderr, "Unsupported codec!\n");
     return -1; // Codec not found
@@ -137,7 +139,8 @@ int main(int argc, char *argv[]) {
 
   // Allocate video frame
   pFrame=av_frame_alloc();
-
+    if(pFrame==NULL)
+        return -1;
   // Allocate an AVFrame structure
   pFrameRGB=av_frame_alloc();
   if(pFrameRGB==NULL)
