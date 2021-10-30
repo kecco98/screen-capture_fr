@@ -136,10 +136,11 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     height = DisplayHeight(dpy, snum);
     printf("display size is %d x %d\n", width, height);*/
 
-    if (codec_id == AV_CODEC_ID_H264)
+   //Per un altra codifica!!
+ /*   if (codec_id == AV_CODEC_ID_H264)
     {
         av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
-    }
+    }*/
 
     outAVCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
     if( !outAVCodec )
