@@ -65,6 +65,7 @@ private:
 
 
     int VideoStreamIndx;
+    int codec_id;
 
 public:
 

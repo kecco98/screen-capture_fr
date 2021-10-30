@@ -120,8 +120,8 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     outAVCodecContext->pix_fmt  = AV_PIX_FMT_YUV420P;
     outAVCodecContext->bit_rate = 400000; // 2500000
-    outAVCodecContext->width = 1920;
-    outAVCodecContext->height = 1080;
+    outAVCodecContext->width = width;
+    outAVCodecContext->height = height;
     outAVCodecContext->gop_size = 3;
     outAVCodecContext->max_b_frames = 2;
     outAVCodecContext->time_base.num = 1;
@@ -135,5 +135,17 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     width = DisplayWidth(dpy, snum);
     height = DisplayHeight(dpy, snum);
     printf("display size is %d x %d\n", width, height);*/
+
+    if (codec_id == AV_CODEC_ID_H264)
+    {
+        av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
+    }
+
+    outAVCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
+    if( !outAVCodec )
+    {
+        cout<<"\nError in finding the av codecs. try again with correct codec"<<endl;
+        exit(1);
+    }
 
 }
