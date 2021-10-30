@@ -36,11 +36,11 @@ int ScreenCapture::setup(const char* start)
         exit(1);
     }
 
-  /*  if(av_dict_set( &options,"framerate","30",0 ) < 0)
+  if(av_dict_set( &options,"framerate","30",0 ) < 0)
     {
         cout<<"\nerror in setting dictionary value";
         exit(2);
-    }*/
+    }
 
 
 /*    if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) da fare forse per il pausa e riprendi
@@ -48,6 +48,23 @@ int ScreenCapture::setup(const char* start)
         cout<<"\nunable to find the stream information";
         exit(1);
     }*/
+    VideoStreamIndx = -1;
 
+    /* find the first video stream index . Also there is an API available to do the below operations */
+    for(int i = 0; i < pAVFormatContext->nb_streams; i++ ) // find video stream posistion/index.
+    {
+        if( pAVFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO )
+        {
+            VideoStreamIndx = i;
+            break;
+        }
+
+    }
+
+    if( VideoStreamIndx == -1)
+    {
+        cout<<"\nunable to find the video stream index. (-1)";
+        exit(1);
+    }
 
 }
