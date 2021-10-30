@@ -11,11 +11,12 @@ int main()
 {
     char *start = nullptr;
     cout<<"Insert the starting point!"<<endl;
-    cin>> start;
-    ScreenCapture video_record(start);
+    cin >> start;
+    ScreenCapture video_record;
 
+    video_record.setup(start);
 
-    cout<<"\nprogram executed successfully\n";
+    cout<<"Program executed successfully"<<endl;
 
     return 0;
 }
