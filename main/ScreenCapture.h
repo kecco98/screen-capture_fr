@@ -50,10 +50,12 @@ extern "C"
 class ScreenCapture
 {
 private:
+    AVFormatContext *pAVFormatContext;
+    AVInputFormat *pAVInputFormat;
 
 public:
 
-    ScreenCapture();
+    ScreenCapture(const char* start);
     ~ScreenCapture();
 
 
