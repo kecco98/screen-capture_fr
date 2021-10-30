@@ -9,7 +9,6 @@ using namespace std;
 ScreenCapture::ScreenCapture(){
 
     avdevice_register_all();
-    cout<<"\nall required functions are registered successfully";
 
 }
 
@@ -70,5 +69,18 @@ int ScreenCapture::setup(const char* start)
     pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
 
 
+    pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);
+    if( pAVCodec == NULL )
+    {
+        cout<<"\nunable to find the decoder";
+        exit(1);
+    }
+
+    value = avcodec_open2(pAVCodecContext , pAVCodec , NULL);//Initialize the AVCodecContext to use the given AVCodec.
+    if( value < 0 )
+    {
+        cout<<"\nunable to open the av codec";
+        exit(1);
+    }
 
 }
