@@ -149,7 +149,7 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
         exit(1);
     }
 
-
+    //riga 331 screenrecorder
 
 
 
