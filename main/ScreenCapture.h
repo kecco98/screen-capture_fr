@@ -62,6 +62,9 @@ private:
     AVStream *video_st;
     AVCodecContext *outAVCodecContext;
     AVCodec *outAVCodec;
+    AVFrame *pAVFrame;
+    AVFrame *outFrame;
+    AVPacket *pAVPacket;
 
 
     int VideoStreamIndx;

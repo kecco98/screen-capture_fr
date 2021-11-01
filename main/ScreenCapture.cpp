@@ -195,5 +195,40 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
 
 int ScreenCapture::startRecording() {
 
+    int flag;
+    int frameFinished;
+
+    pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
+    av_init_packet(pAVPacket);
+
+    pAVFrame = av_frame_alloc();
+    if( !pAVFrame )
+    {
+        cout<<"\nUnable to release the avframe resources"<<endl;
+        exit(1);
+    }
+
+    outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
+    if( !outFrame )
+    {
+        cout<<"\nUnable to release the avframe resources for outframe"<<endl;
+        exit(1);
+    }
+
+    int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
+	uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
+	if( video_outbuf == nullptr )
+	{
+		cout<<"\nUnable to allocate memory"<<endl;
+		exit(1);
+	}
+
+    // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
+    // returns : the size in bytes required for src
+    if(av_image_fill_arrays( outFrame->data, outFrame->linesize, video_outbuf , AV_PIX_FMT_YUV420P, outAVCodecContext->width,outAVCodecContext->height,1 ); < 0)
+    {
+        cout<<"\nError in filling image array"<<endl;
+    }
+
 }
 
