@@ -274,7 +274,7 @@ int ScreenCapture::startRecording() {
                 ret= avcodec_receive_frame(pAVCodecContext,pAVFrame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
 
-                               return -1;
+                               return -2;
                         else if (ret < 0) {
                                 fprintf(stderr, "Error during decoding\n");
                                 return -1 ;
@@ -285,9 +285,24 @@ int ScreenCapture::startRecording() {
                 outPacket.data = NULL;    // packet data will be allocated by the encoder
                 outPacket.size = 0;
 
-                avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
+               // avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);//avcodec_send_frame()
+              if(avcodec_send_frame(outAVCodecContext,outFrame)>=0){
+                    cout<<"si";
+                    if(avcodec_receive_packet(outAVCodecContext,&outPacket)>=0){
+                        if(outPacket.pts != AV_NOPTS_VALUE)
+                            outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
+                        if(outPacket.dts != AV_NOPTS_VALUE)
+                            outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
+                        if(av_write_frame(outAVFormatContext , &outPacket) != 0) //avcodec_receive_packet()
+                        {
+                            cout<<"\nerror in writing video frame";
 
-                if(got_picture)
+                        }
+                        av_packet_unref(&outPacket);
+                    }
+                }
+
+             /* if(got_picture)
                 {
                     if(outPacket.pts != AV_NOPTS_VALUE)
                         outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
@@ -295,15 +310,15 @@ int ScreenCapture::startRecording() {
                         outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
 
                     printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
-                    if(av_write_frame(outAVFormatContext , &outPacket) != 0)
+                    if(av_write_frame(outAVFormatContext , &outPacket) != 0) //avcodec_receive_packet()
                     {
                         cout<<"\nerror in writing video frame";
                     }
 
                     av_packet_unref(&outPacket);
-                } // got_picture
+                } // got_picture*/
 
-                av_packet_unref(&outPacket);
+              // av_packet_unref(&outPacket);
             } // frameFinished
 
         }
