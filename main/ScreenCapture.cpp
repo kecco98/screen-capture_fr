@@ -167,6 +167,7 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     /* create empty video file */
     if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
     {
+        cout<<output_file<<"  file ouy\n ";
         if( avio_open2(&outAVFormatContext->pb , output_file , AVIO_FLAG_WRITE ,NULL, NULL) < 0 )
         {
             cout<<"\nerror in creating the video file";
@@ -193,3 +194,4 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
 
 
 }
+
