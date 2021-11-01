@@ -21,7 +21,7 @@ int main()
     ScreenCapture video_record;
     cout<<"Insert the output patch!"<<endl;
     cin >> in2;
-    in2="../media_output/"+in2+"/.mp4";
+    in2="../media_output/"+in2+".mp4";
     output=in2.c_str();
     cout<<"Insert the width of the window you want to record!"<<endl;
     cin >> width;
