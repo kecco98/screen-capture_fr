@@ -272,18 +272,14 @@ int ScreenCapture::startRecording() {
             ret=avcodec_send_packet(pAVCodecContext,pAVPacket);
             if(ret>=0){
                 ret= avcodec_receive_frame(pAVCodecContext,pAVFrame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
 
                                return -1;
                         else if (ret < 0) {
                                 fprintf(stderr, "Error during decoding\n");
                                 return -1 ;
                              }
-                        frameFinished=1;
-            }
 
-            if(frameFinished)// Frame successfully decoded :)
-            {
                 sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize,0, pAVCodecContext->height, outFrame->data,outFrame->linesize);
                 av_init_packet(&outPacket);
                 outPacket.data = NULL;    // packet data will be allocated by the encoder
