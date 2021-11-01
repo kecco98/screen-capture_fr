@@ -220,7 +220,7 @@ int ScreenCapture::startRecording() {
         exit(1);
     }
 
-    int video_outbuf_size;
+    //int video_outbuf_size;
     int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
     uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
     if( video_outbuf == NULL )
