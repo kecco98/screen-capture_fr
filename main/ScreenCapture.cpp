@@ -258,16 +258,28 @@ int ScreenCapture::startRecording() {
     int j = 0;
 
     int got_picture;
-
+    int ret;
     while( av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
     {
         if( ii++ == no_frames )break;
         if(pAVPacket->stream_index == VideoStreamIndx)
         {
 
-            if( avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket ) < 0)
-            {
-                cout<<"unable to decode video";
+           // if( avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket ) < 0)
+            //{
+              //  cout<<"unable to decode video";
+           // }
+            ret=avcodec_send_packet(pAVCodecContext,pAVPacket);
+            if(ret>=0){
+                ret= avcodec_receive_frame(pAVCodecContext,pAVFrame);
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+
+                               return -1;
+                        else if (ret < 0) {
+                                fprintf(stderr, "Error during decoding\n");
+                                return -1 ;
+                             }
+                        frameFinished=1;
             }
 
             if(frameFinished)// Frame successfully decoded :)
@@ -278,7 +290,7 @@ int ScreenCapture::startRecording() {
                 outPacket.size = 0;
 
                 avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
-//dbkjfbf
+
                 if(got_picture)
                 {
                     if(outPacket.pts != AV_NOPTS_VALUE)
