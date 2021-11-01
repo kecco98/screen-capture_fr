@@ -230,5 +230,80 @@ int ScreenCapture::startRecording() {
         cout<<"\nError in filling image array"<<endl;
     }
 
+    SwsContext* swsCtx_ ;
+
+    // Allocate and return swsContext.
+    // a pointer to an allocated context, or NULL in case of error
+    // Deprecated : Use sws_getCachedContext() instead.
+    swsCtx_ = sws_getContext(pAVCodecContext->width,
+                             pAVCodecContext->height,
+                             pAVCodecContext->pix_fmt,
+                             outAVCodecContext->width,
+                             outAVCodecContext->height,
+                             outAVCodecContext->pix_fmt,
+                             SWS_BICUBIC, NULL, NULL, NULL);
+
+
+    int ii = 0;
+    int no_frames = 100;
+    cout<<"\nenter No. of frames to capture : ";
+    cin>>no_frames;
+
+    AVPacket outPacket;
+    int j = 0;
+
+    int got_picture;
+
+    while( av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        if( ii++ == no_frames )break;
+        if(pAVPacket->stream_index == VideoStreamIndx)
+        {
+            if( avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket ) < 0)
+            {
+                cout<<"unable to decode video";
+            }
+
+            if(frameFinished)// Frame successfully decoded :)
+            {
+                sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize,0, pAVCodecContext->height, outFrame->data,outFrame->linesize);
+                av_init_packet(&outPacket);
+                outPacket.data = NULL;    // packet data will be allocated by the encoder
+                outPacket.size = 0;
+
+                avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
+
+                if(got_picture)
+                {
+                    if(outPacket.pts != AV_NOPTS_VALUE)
+                        outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
+                    if(outPacket.dts != AV_NOPTS_VALUE)
+                        outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
+
+                    printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
+                    if(av_write_frame(outAVFormatContext , &outPacket) != 0)
+                    {
+                        cout<<"\nerror in writing video frame";
+                    }
+
+                    av_packet_unref(&outPacket);
+                } // got_picture
+
+                av_packet_unref(&outPacket);
+            } // frameFinished
+
+        }
+    }// End of while-loop
+
+    if( av_write_trailer(outAVFormatContext) < 0)
+    {
+        cout<<"\nerror in writing av trailer";
+        exit(1);
+    }
+
+
+//THIS WAS ADDED LATER
+    av_free(video_outbuf);
+
 }
 
