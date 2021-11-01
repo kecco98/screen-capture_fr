@@ -149,9 +149,46 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
         exit(1);
     }
 
-    //riga 331 screenrecorder
+    /* Some container formats (like MP4) require global headers to be present
+     Mark the encoder so that it behaves accordingly. */
+
+    if ( outAVFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
+    {
+        outAVCodecContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    }
 
 
+    if( avcodec_open2(outAVCodecContext, outAVCodec, NULL) < 0) //inizializza out context
+    {
+        cout<<"\nerror in opening the avcodec";
+        exit(1);
+    }
+
+    /* create empty video file */
+    if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
+    {
+        if( avio_open2(&outAVFormatContext->pb , output_file , AVIO_FLAG_WRITE ,NULL, NULL) < 0 )
+        {
+            cout<<"\nerror in creating the video file";
+            exit(1);
+        }
+    }
+
+    if(!outAVFormatContext->nb_streams)
+    {
+        cout<<"\noutput file dose not contain any stream";
+        exit(1);
+    }
+
+    /* imp: mp4 container or some advanced container file required header information*/
+    if(avformat_write_header(outAVFormatContext , &options) < 0)
+    {
+        cout<<"\nerror in writing the header context";
+        exit(1);
+    }
+
+    cout<<"\n\nOutput file information :\n\n";
+    av_dump_format(outAVFormatContext , 0 ,output_file ,1);
 
 
 
