@@ -278,7 +278,7 @@ int ScreenCapture::startRecording() {
                 outPacket.size = 0;
 
                 avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
-
+//dbkjfbf
                 if(got_picture)
                 {
                     if(outPacket.pts != AV_NOPTS_VALUE)
