@@ -116,6 +116,8 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
 
     /* set property of the video file */
     outAVCodecContext = video_st->codec;
+    //avcodec_parameters_to_context(outAVCodecContext, video_st->codecpar);
+
     outAVCodecContext->codec_id = AV_CODEC_ID_MPEG4;// AV_CODEC_ID_MPEG4; // AV_CODEC_ID_H264 // AV_CODEC_ID_MPEG1VIDEO
     outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     outAVCodecContext->pix_fmt  = AV_PIX_FMT_YUV420P;
@@ -195,8 +197,11 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
 
 int ScreenCapture::startRecording() {
 
-    int flag;
-    int frameFinished;
+
+    int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
+
+
+
 
     pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
     av_init_packet(pAVPacket);
@@ -204,30 +209,30 @@ int ScreenCapture::startRecording() {
     pAVFrame = av_frame_alloc();
     if( !pAVFrame )
     {
-        cout<<"\nUnable to release the avframe resources"<<endl;
+        cout<<"\nunable to release the avframe resources";
         exit(1);
     }
 
     outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
     if( !outFrame )
     {
-        cout<<"\nUnable to release the avframe resources for outframe"<<endl;
+        cout<<"\nunable to release the avframe resources for outframe";
         exit(1);
     }
 
+    int video_outbuf_size;
     int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
-	uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
-	if( video_outbuf == nullptr )
-	{
-		cout<<"\nUnable to allocate memory"<<endl;
-		exit(1);
-	}
+    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
+    if( video_outbuf == NULL )
+    {
+        cout<<"\nunable to allocate memory";
+        exit(1);
+    }
 
     // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
-    // returns : the size in bytes required for src
-    if(av_image_fill_arrays( outFrame->data, outFrame->linesize, video_outbuf , AV_PIX_FMT_YUV420P, outAVCodecContext->width,outAVCodecContext->height,1 ); < 0)
+    if(av_image_fill_arrays( outFrame->data, outFrame->linesize, video_outbuf , AV_PIX_FMT_YUV420P, outAVCodecContext->width,outAVCodecContext->height,1 )<0) // returns : the size in bytes required for src
     {
-        cout<<"\nError in filling image array"<<endl;
+        cout<<"\nerror in filling image array";
     }
 
     SwsContext* swsCtx_ ;
@@ -259,6 +264,7 @@ int ScreenCapture::startRecording() {
         if( ii++ == no_frames )break;
         if(pAVPacket->stream_index == VideoStreamIndx)
         {
+
             if( avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket ) < 0)
             {
                 cout<<"unable to decode video";
@@ -294,6 +300,7 @@ int ScreenCapture::startRecording() {
 
         }
     }// End of while-loop
+
 
     if( av_write_trailer(outAVFormatContext) < 0)
     {
