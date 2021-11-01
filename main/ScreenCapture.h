@@ -72,6 +72,7 @@ public:
     ScreenCapture();
     ~ScreenCapture();
     int setup(const char* start, const char* output, int width, int height);
+    int startRecording();
 
 
 };

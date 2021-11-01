@@ -191,7 +191,9 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     cout<<"\n\nOutput file information :\n\n";
     av_dump_format(outAVFormatContext , 0 ,output_file ,1);
 
+}
 
+int ScreenCapture::startRecording() {
 
 }
 

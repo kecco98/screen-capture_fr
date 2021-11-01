@@ -29,6 +29,7 @@ int main()
     cin >> height;
 
     video_record.setup(start, output, width, height);
+    video_record.startRecording();
 
     cout<<"\nProgram executed successfully"<<endl;
 
