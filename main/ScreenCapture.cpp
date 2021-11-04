@@ -41,6 +41,19 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
         exit(2);
     }
 
+  //I valori dovrebbero essere passati cosi' ma non funziona
+  /*if(av_dict_set_int( &options,"width",width,0 ) < 0)
+    {
+        cout<<"\nerror in setting dictionary value";
+        exit(3);
+    }
+
+  if(av_dict_set_int( &options,"height",height,0 ) < 0)
+    {
+        cout<<"\nerror in setting dictionary value";
+        exit(4);
+    }*/
+
 
 /*    if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) da fare forse per il pausa e riprendi
     {

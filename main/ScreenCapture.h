@@ -65,6 +65,7 @@ private:
     AVFrame *pAVFrame;
     AVFrame *outFrame;
     AVPacket *pAVPacket;
+    AVDictionary *d;
 
 
     int VideoStreamIndx;
