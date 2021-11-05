@@ -19,7 +19,7 @@ ScreenCapture::~ScreenCapture(){
 }
 
 
-int ScreenCapture::setup(const char* start, const char* output_file, int width, int height)
+int ScreenCapture::setup(const char* start, const char* output_file, int width, int height, const char* conc)
 {
     pAVFormatContext = NULL;
     options = NULL;
@@ -44,7 +44,7 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     }
 
 
-  if(av_dict_set( &options,"video_size","1000x1000",0 ) < 0) //creare una concat di heigthxwitdh
+  if(av_dict_set( &options,"video_size",conc,0 ) < 0) //creare una concat di heigthxwitdh
     {
         cout<<"\nerror in setting video size";
         exit(3);
