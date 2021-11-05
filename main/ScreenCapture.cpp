@@ -28,12 +28,14 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     pAVFormatContext = avformat_alloc_context();
     //Set screen as input device
     pAVInputFormat = av_find_input_format("x11grab");
+
     cout<<start;
 
-    if(avformat_open_input(&pAVFormatContext, start, pAVInputFormat, NULL) != 0) {
-        cout<<"Error in opening the input device!";
-        exit(1);
-    }
+//https://www.titanwolf.org/Network/q/eb46fd58-9cf7-4160-a1a2-a924d8c5639a/y
+    //The distance from the left edge of the screen or desktop
+    //av_dict_set(&options,"offset_x","20",0);
+    //The distance from the top edge of the screen or desktop
+    //av_dict_set(&options,"offset_y","40",0);
 
   if(av_dict_set( &options,"framerate","30",0 ) < 0)
     {
@@ -41,14 +43,19 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
         exit(2);
     }
 
-  //I valori dovrebbero essere passati cosi' ma non funziona
-  /*if(av_dict_set_int( &options,"width",width,0 ) < 0)
+
+  if(av_dict_set( &options,"video_size","1000x1000",0 ) < 0) //creare una concat di heigthxwitdh
     {
-        cout<<"\nerror in setting dictionary value";
+        cout<<"\nerror in setting video size";
         exit(3);
     }
 
-  if(av_dict_set_int( &options,"height",height,0 ) < 0)
+
+    if(avformat_open_input(&pAVFormatContext, start, pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
+        cout<<"Error in opening the input device!";
+        exit(1);
+    }
+  /*if(av_dict_set_int( &options,"height",1000,0 ) < 0)
     {
         cout<<"\nerror in setting dictionary value";
         exit(4);
