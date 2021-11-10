@@ -213,6 +213,31 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     cout<<"\n\nOutput file information :\n\n";
     av_dump_format(outAVFormatContext , 0 ,output_file ,1);
 
+
+    pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
+    av_init_packet(pAVPacket);
+
+    pAVFrame = av_frame_alloc();
+    pAVFrame->width=width;
+    pAVFrame->height=height;
+    pAVFrame->format=-1;
+    if( !pAVFrame )
+    {
+        cout<<"\nunable to release the avframe resources";
+        exit(1);
+    }
+
+    outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
+    outFrame->width=width;
+    outFrame->height=height;
+    outFrame->format=-1;
+
+    if( !outFrame )
+    {
+        cout<<"\nunable to release the avframe resources for outframe";
+        exit(1);
+    }
+
 }
 
 int ScreenCapture::startRecording() {
@@ -223,22 +248,6 @@ int ScreenCapture::startRecording() {
 
 
 
-    pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
-    av_init_packet(pAVPacket);
-
-    pAVFrame = av_frame_alloc();
-    if( !pAVFrame )
-    {
-        cout<<"\nunable to release the avframe resources";
-        exit(1);
-    }
-
-    outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
-    if( !outFrame )
-    {
-        cout<<"\nunable to release the avframe resources for outframe";
-        exit(1);
-    }
 
     //int video_outbuf_size;
     int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
