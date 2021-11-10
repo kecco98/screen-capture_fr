@@ -66,7 +66,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(3);
     }
 
-    av_dict_set( &options, "preset", "ultrafast", 0 );
+    av_dict_set( &options, "preset", "slow", 0 );
 
     if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
         cout<<"Error in opening the input device!";
@@ -161,7 +161,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     outAVCodecContext->bit_rate = 400000; // 2500000
     outAVCodecContext->width = width;
     outAVCodecContext->height = height;
-    outAVCodecContext->gop_size = 3;
+    outAVCodecContext->gop_size = 0;
     outAVCodecContext->max_b_frames = 2;
     outAVCodecContext->time_base.num = 1;
     outAVCodecContext->time_base.den = 30;
