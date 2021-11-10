@@ -218,9 +218,7 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     av_init_packet(pAVPacket);
 
     pAVFrame = av_frame_alloc();
-    pAVFrame->width=width;
-    pAVFrame->height=height;
-    pAVFrame->format=-1;
+
     if( !pAVFrame )
     {
         cout<<"\nunable to release the avframe resources";
@@ -230,7 +228,7 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
     outFrame->width=width;
     outFrame->height=height;
-    outFrame->format=-1;
+    outFrame->format=AV_CODEC_ID_MPEG4;
 
     if( !outFrame )
     {
