@@ -260,7 +260,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 }
 void ScreenCapture::captureScreen(int no_frames )
 {
-
     int ii = 0;
     int ret;
 
