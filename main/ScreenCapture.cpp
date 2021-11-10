@@ -213,15 +213,6 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     cout<<"\n\nOutput file information :\n\n";
     av_dump_format(outAVFormatContext , 0 ,output_file ,1);
 
-}
-
-int ScreenCapture::startRecording() {
-
-
-    int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
-
-
-
 
     pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
     av_init_packet(pAVPacket);
@@ -234,11 +225,26 @@ int ScreenCapture::startRecording() {
     }
 
     outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
+    outFrame->width=width;
+    outFrame->height=height;
+    outFrame->format=-1;
+
     if( !outFrame )
     {
         cout<<"\nunable to release the avframe resources for outframe";
         exit(1);
     }
+
+}
+
+int ScreenCapture::startRecording() {
+
+
+    int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
+
+
+
+
 
     //int video_outbuf_size;
     int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
