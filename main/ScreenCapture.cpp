@@ -233,8 +233,11 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
     av_init_packet(pAVPacket);
 
-    pAVFrame = av_frame_alloc();
 
+    pAVFrame = av_frame_alloc();
+    pAVFrame->width=width;
+    pAVFrame->height=height;
+    pAVFrame->format=AV_PIX_FMT_RGBA;
     if( !pAVFrame )
     {
         cout<<"\nunable to release the avframe resources";
