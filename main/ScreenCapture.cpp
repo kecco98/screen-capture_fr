@@ -13,13 +13,31 @@ ScreenCapture::ScreenCapture(){
 }
 
 ScreenCapture::~ScreenCapture(){
+    avformat_close_input(&pAVFormatContext);
+    if( !pAVFormatContext )
+    {
+        cout<<"\nfile closed sucessfully";
+    }
+    else
+    {
+        cout<<"\nunable to close the file";
+        exit(1);
+    }
 
-
-
+    avformat_free_context(pAVFormatContext);
+    if( !pAVFormatContext )
+    {
+        cout<<"\navformat free successfully";
+    }
+    else
+    {
+        cout<<"\nunable to free avformat context";
+        exit(1);
+    }
 }
 
 
-int ScreenCapture::setup(const char* start, const char* output_file, int width, int height, const char* conc)
+int ScreenCapture::setup(const char* output_file, int width, int height, const char* conc)
 {
     pAVFormatContext = NULL;
     options = NULL;
@@ -28,8 +46,6 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     pAVFormatContext = avformat_alloc_context();
     //Set screen as input device
     pAVInputFormat = av_find_input_format("x11grab");
-
-    cout<<start;
 
 //https://www.titanwolf.org/Network/q/eb46fd58-9cf7-4160-a1a2-a924d8c5639a/y
     //The distance from the left edge of the screen or desktop
@@ -51,7 +67,7 @@ int ScreenCapture::setup(const char* start, const char* output_file, int width, 
     }
 
 
-    if(avformat_open_input(&pAVFormatContext, start, pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
+    if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
         cout<<"Error in opening the input device!";
         exit(1);
     }
