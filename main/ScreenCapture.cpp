@@ -258,7 +258,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 }
 
 int ScreenCapture::startRecording() {
-
+ //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
 
     int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
 
