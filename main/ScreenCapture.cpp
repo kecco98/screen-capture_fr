@@ -237,7 +237,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     pAVFrame = av_frame_alloc();
     pAVFrame->width=width;
     pAVFrame->height=height;
-    pAVFrame->format=AV_PIX_FMT_RGBA;
+    pAVFrame->format=AV_PIX_FMT_YUV420P;
     if( !pAVFrame )
     {
         cout<<"\nunable to release the avframe resources";
@@ -268,7 +268,7 @@ int ScreenCapture::startRecording() {
 
     //int video_outbuf_size;
     int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
-    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
+    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes*2); //x2 buffer
     if( video_outbuf == NULL )
     {
         cout<<"\nunable to allocate memory";
@@ -333,7 +333,7 @@ int ScreenCapture::startRecording() {
 
                // avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);//avcodec_send_frame()
               if(avcodec_send_frame(outAVCodecContext,outFrame)>=0){
-                    cout<<"si";
+                    //cout<<"si";
                     if(avcodec_receive_packet(outAVCodecContext,&outPacket)>=0){
                         if(outPacket.pts != AV_NOPTS_VALUE)
                             outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
