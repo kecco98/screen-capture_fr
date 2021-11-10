@@ -66,6 +66,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(3);
     }
 
+    av_dict_set( &options, "preset", "ultrafast", 0 );
 
     if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
         cout<<"Error in opening the input device!";
@@ -235,9 +236,10 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 
     pAVFrame = av_frame_alloc();
-    pAVFrame->width=width;
-    pAVFrame->height=height;
-    pAVFrame->format=AV_PIX_FMT_YUV420P;
+    //pAVFrame->width=width;
+   // pAVFrame->height=height;
+   // pAVFrame->format=AV_PIX_FMT_YUV420P;
+
     if( !pAVFrame )
     {
         cout<<"\nunable to release the avframe resources";
