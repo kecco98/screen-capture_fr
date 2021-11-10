@@ -77,6 +77,12 @@ public:
     ~ScreenCapture();
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
+    void captureScreen(AVCodecContext* codecContext, AVFormatContext* formatContext, int streamIndex);
+    void rescaleVideo(AVCodecContext* inCodecContext, AVCodecContext* outCodecContext);
+    void videoSave(AVCodecContext* codecContext);
+
+
+
 
 
 };

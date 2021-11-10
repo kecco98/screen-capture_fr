@@ -2,6 +2,7 @@
 // Created by kecco on 30/10/21.
 //
 
+#include <thread>
 #include "ScreenCapture.h"
 
 using namespace std;
@@ -264,13 +265,9 @@ int ScreenCapture::startRecording() {
 
     int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
 
-
-
-
-
     //int video_outbuf_size;
     int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
-    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes*2); //x2 buffer
+    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes*32); //x2 buffer
     if( video_outbuf == NULL )
     {
         cout<<"\nunable to allocate memory";
@@ -283,7 +280,7 @@ int ScreenCapture::startRecording() {
         cout<<"\nerror in filling image array";
     }
 
-    SwsContext* swsCtx_ ;
+    SwsContext* swsCtx_ = nullptr;
 
     // Allocate and return swsContext.
     // a pointer to an allocated context, or NULL in case of error
@@ -383,5 +380,18 @@ int ScreenCapture::startRecording() {
 //THIS WAS ADDED LATER
     av_free(video_outbuf);
 
+    auto demux = new thread(&ScreenCapture::captureScreen, this, pAVCodecContext, pAVFormatContext, VideoStreamIndx);
+    auto rescale = new thread(&ScreenCapture::rescaleVideo, this, pAVCodecContext, outAVCodecContext);
+    demux = new thread(&ScreenCapture::videoSave, this, outAVCodecContext);
+    return 0;
+
 }
 
+void ScreenCapture::rescaleVideo(AVCodecContext* inCodecContext, AVCodecContext* outCodecContext) {
+
+    sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize, 0, pAVCodecContext->height, outFrame->data,
+              outFrame->linesize);
+    av_init_packet(&outPacket);
+    outPacket.data = NULL;    // packet data will be allocated by the encoder
+
+}
