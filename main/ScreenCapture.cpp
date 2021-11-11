@@ -2,6 +2,7 @@
 // Created by kecco on 30/10/21.
 //
 
+#include <thread>
 #include "ScreenCapture.h"
 
 using namespace std;
@@ -258,34 +259,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 }
-void ScreenCapture::captureScreen(int no_frames )
-{
-    int ii = 0;
-    int ret;
-
-    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
-    {
-        if( ii++ == no_frames )break;
-        if(pAVPacket->stream_index == VideoStreamIndx) {
-            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
-            if (ret >= 0) {
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
-
-                    exit(-2);
-                else if (ret < 0) {
-                    fprintf(stderr, "Error during decoding\n");
-                    exit( -1);
-                }
-            }
-        }
-    }
-
-
-
-
-    }
-
-
 
 int ScreenCapture::startRecording() {
  //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
@@ -404,14 +377,85 @@ int ScreenCapture::startRecording() {
         cout<<"\nerror in writing av trailer";
         exit(1);
     }
+    /*
+    auto demux = new thread(&ScreenCapture::captureScreen, this, no_frames);
 
+    auto rescale = new thread(&ScreenCapture::scaleVideo, this, no_frames);
 
+    demux = new thread(&ScreenCapture::encodeVideo, this, no_frames);
+    */
 //THIS WAS ADDED LATER
     av_free(video_outbuf);  //lasciami qui
 
 }
 
-void ScreenCapture::encodeVideo(no_frames)
+void ScreenCapture::captureScreen(int no_frames )
+{
+    int ii = 0;
+    int ret;
+
+    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        if( ii++ == no_frames )break;
+        if(pAVPacket->stream_index == VideoStreamIndx) {
+            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
+            if (ret >= 0) {
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
+
+                    exit(-2);
+                else if (ret < 0) {
+                    fprintf(stderr, "Error during decoding\n");
+                    exit( -1);
+                }
+            }
+        }
+    }
+}
+
+void ScreenCapture::scaleVideo(int no_frames) {
+//int video_outbuf_size;
+
+    AVPacket outPacket;
+
+    int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
+    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
+    if( video_outbuf == NULL )
+    {
+        cout<<"\nunable to allocate memory";
+        exit(1);
+    }
+
+    // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
+    if(av_image_fill_arrays( outFrame->data, outFrame->linesize, video_outbuf , AV_PIX_FMT_YUV420P, outAVCodecContext->width,outAVCodecContext->height,1 )<0) // returns : the size in bytes required for src
+    {
+        cout<<"\nerror in filling image array";
+    }
+
+    SwsContext* swsCtx_ ;
+
+    // Allocate and return swsContext.
+    // a pointer to an allocated context, or NULL in case of error
+    // Deprecated : Use sws_getCachedContext() instead.
+    swsCtx_ = sws_getContext(pAVCodecContext->width,
+                             pAVCodecContext->height,
+                             pAVCodecContext->pix_fmt,
+                             outAVCodecContext->width,
+                             outAVCodecContext->height,
+                             outAVCodecContext->pix_fmt,
+                             SWS_BICUBIC, NULL, NULL, NULL);
+    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize,0, pAVCodecContext->height, outFrame->data,outFrame->linesize);
+        av_init_packet(&outPacket);
+        outPacket.data = NULL;    // packet data will be allocated by the encoder
+        outPacket.size = 0;
+        avcodec_send_frame(outAVCodecContext,outFrame);
+    }
+
+
+
+}
+void ScreenCapture::encodeVideo(int no_frames)
 {
 
     AVPacket outPacket;
@@ -437,7 +481,5 @@ void ScreenCapture::encodeVideo(no_frames)
         cout<<"\nerror in writing av trailer";
         exit(1);
     }
-
-
 
 }
