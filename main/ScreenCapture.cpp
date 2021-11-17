@@ -509,7 +509,7 @@ void ScreenCapture::encodeVideo(int no_frames)
         cout<<"\nerror in writing av trailer";
         exit(1);
     }
-
+ //
 
 
 }
