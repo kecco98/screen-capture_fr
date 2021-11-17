@@ -259,7 +259,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 }
-void ScreenCapture::captureScreen(int no_frames )
+/*void ScreenCapture::captureScreen(int no_frames )
 {
     int ii = 0;
     int ret;
@@ -284,7 +284,7 @@ void ScreenCapture::captureScreen(int no_frames )
 
 
 
-    }
+    }*/
 
 
 
@@ -332,7 +332,7 @@ int ScreenCapture::startRecording() {
     cin>>no_frames;
 
     AVPacket outPacket;
-   int ii;
+    int ii=0;
     int ret;
     while( av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
     {
