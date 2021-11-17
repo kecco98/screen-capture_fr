@@ -259,6 +259,34 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 }
+void ScreenCapture::captureScreen(int no_frames )
+{
+    int ii = 0;
+    int ret;
+
+    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        if( ii++ == no_frames )break;
+        if(pAVPacket->stream_index == VideoStreamIndx) {
+            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
+            if (ret >= 0) {
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
+
+                    exit(-2);
+                else if (ret < 0) {
+                    fprintf(stderr, "Error during decoding\n");
+                    exit( -1);
+                }
+            }
+        }
+    }
+
+
+
+
+    }
+
+
 
 int ScreenCapture::startRecording() {
  //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
@@ -481,5 +509,7 @@ void ScreenCapture::encodeVideo(int no_frames)
         cout<<"\nerror in writing av trailer";
         exit(1);
     }
+
+
 
 }
