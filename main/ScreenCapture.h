@@ -78,6 +78,10 @@ public:
     ~ScreenCapture();
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
+    void captureScreen(int no_frames);
+    void scaleVideo(int no_frames);
+    void encodeVideo(int no_frames);
+
 
 
 };
