@@ -258,7 +258,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 }
-void ScreenCapture::captureScreen(int no_frames )
+/*void ScreenCapture::captureScreen(int no_frames )
 {
     int ii = 0;
     int ret;
@@ -285,7 +285,7 @@ void ScreenCapture::captureScreen(int no_frames )
 
     }
 
-
+*/
 
 int ScreenCapture::startRecording() {
  //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
@@ -410,7 +410,7 @@ int ScreenCapture::startRecording() {
     av_free(video_outbuf);  //lasciami qui
 
 }
-
+/*
 void ScreenCapture::encodeVideo(no_frames)
 {
 
@@ -440,4 +440,4 @@ void ScreenCapture::encodeVideo(no_frames)
 
 
 
-}
+}*/
