@@ -65,7 +65,14 @@ private:
     AVFrame *pAVFrame;
     AVFrame *outFrame;
     AVPacket *pAVPacket;
-    AVDictionary *d;
+
+    AVDictionary *audioOptions;
+    AVFormatContext *pAudioFormatContext;
+    AVInputFormat *pAudioInputFormat;
+    AVCodec *pAudioCodec;
+    AVCodecContext *pAudioCodecContext;
+    AVCodec *outAudioCodec;
+    AVCodecContext *outAudioCodecContext;
 
 
     int VideoStreamIndx;
@@ -78,9 +85,9 @@ public:
     ~ScreenCapture();
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
-    void captureScreen(int no_frames);
-    void scaleVideo(int no_frames);
-    void encodeVideo(int no_frames);
+    /*void captureScreen(int no_frames, uint8_t *video_outbuf);
+    void scaleVideo(int no_frames , uint8_t *video_outbuf);
+    void encodeVideo(int no_frames);*/
 
 
 

@@ -19,5 +19,6 @@ pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         )
 target_link_libraries(${PROJECT_NAME}
         PkgConfig::LIBAV
+        pthread
         )
 
