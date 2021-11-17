@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
     av_packet_unref(&packet);
   }
 
-  // Free the RGB image
+  // Free the RGB imageh
   av_free(buffer);
   av_frame_free(&pFrameRGB);
 
