@@ -152,7 +152,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 
-    /* set property of the video file */
+ /*   *//* set property of the video file *//*
     outAVCodecContext = video_st->codec;
     //avcodec_parameters_to_context(outAVCodecContext, video_st->codecpar);
 
@@ -165,16 +165,35 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     outAVCodecContext->gop_size = 3;
     outAVCodecContext->max_b_frames = 2;
     outAVCodecContext->time_base.num = 1;
+    outAVCodecContext->time_base.den = 30;*/
+
+    outAVCodecContext = video_st->codec;
+    outAVCodecContext->codec_id = AV_CODEC_ID_MPEG4;
+    outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
+    outAVCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+    outAVCodecContext->bit_rate = 10000000;
+    outAVCodecContext->width = width;
+    outAVCodecContext->height = height;
+    outAVCodecContext->gop_size = 10;
+    outAVCodecContext->global_quality = 500;
+    outAVCodecContext->max_b_frames = 2;
+    outAVCodecContext->time_base.num = 1;
     outAVCodecContext->time_base.den = 30;
+    outAVCodecContext->bit_rate_tolerance = 400000;
 
-  /* char *wid; Display *dpy; Window w;
-    int width2, height2, snum;
-    dpy = XOpenDisplay(0);
+    if (outAVCodecContext->codec_id == AV_CODEC_ID_H264) { //copiato da vedere a cosa serve
+        av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
+    }
 
-    snum = DefaultScreen(dpy);
-    width2 = DisplayWidth(dpy, snum);
-    height2 = DisplayHeight(dpy, snum);
-    printf("display size is %d x %d\n", width2, height2);*/
+
+    /* char *wid; Display *dpy; Window w;
+      int width2, height2, snum;
+      dpy = XOpenDisplay(0);
+
+      snum = DefaultScreen(dpy);
+      width2 = DisplayWidth(dpy, snum);
+      height2 = DisplayHeight(dpy, snum);
+      printf("display size is %d x %d\n", width2, height2);*/
 
    //Per un altra codifica!!
  /*   if (codec_id == AV_CODEC_ID_H264)
