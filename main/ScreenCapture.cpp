@@ -73,6 +73,12 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cout<<"Error in opening the input device!";
         exit(1);
     }
+
+
+   if (av_dict_set(&options, "probesize", "60M", 0) < 0) {
+        cerr << "Error in setting probesize value" << endl;
+        exit(-1);
+    }
   /*if(av_dict_set_int( &options,"height",1000,0 ) < 0)
     {
         cout<<"\nerror in setting dictionary value";
@@ -80,11 +86,12 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }*/
 
 
-/*    if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) da fare forse per il pausa e riprendi
+    if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) //da fare forse per il pausa e riprendi
     {
         cout<<"\nunable to find the stream information";
         exit(1);
-    }*/
+    }
+
     VideoStreamIndx = -1;
 
     /* find the first video stream index . Also there is an API available to do the below operations */
@@ -105,6 +112,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
     // Saving video codec
     pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
+
 
 
     pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);//trova il codec
@@ -222,7 +230,10 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cout<<"\nerror in opening the avcodec";
         exit(1);
     }
+    avcodec_parameters_from_context(outAVFormatContext->streams[VideoStreamIndx]->codecpar, outAVCodecContext);
 
+
+    //da qui unificare
     /* create empty video file */
     if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
     {
