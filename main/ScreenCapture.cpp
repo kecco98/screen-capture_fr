@@ -2,6 +2,7 @@
 // Created by kecco on 30/10/21.
 //
 
+#include <thread>
 #include "ScreenCapture.h"
 
 using namespace std;
@@ -258,38 +259,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 }
-void ScreenCapture::captureScreen(int no_frames )
-{
-    int ii = 0;
-    int ret;
 
-    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
-    {
-        if( ii++ == no_frames )break;
-        if(pAVPacket->stream_index == VideoStreamIndx) {
-            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
-            if (ret >= 0) {
-                ret = avcodec_receive_frame(pAVCodecContext, pAVFrame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
-
-                    exit(-2);
-                else if (ret < 0) {
-                    fprintf(stderr, "Error during decoding\n");
-                    exit( -1);
-                }
-            }
-        }
-    }
-
-
-
-
-    }
-
-
-
-    // return 0;
-}
 int ScreenCapture::startRecording() {
  //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
 
@@ -407,10 +377,109 @@ int ScreenCapture::startRecording() {
         cout<<"\nerror in writing av trailer";
         exit(1);
     }
+    /*
+    auto demux = new thread(&ScreenCapture::captureScreen, this, no_frames);
 
+    auto rescale = new thread(&ScreenCapture::scaleVideo, this, no_frames);
 
+    demux = new thread(&ScreenCapture::encodeVideo, this, no_frames);
+    */
 //THIS WAS ADDED LATER
-    av_free(video_outbuf);
+    av_free(video_outbuf);  //lasciami qui
 
 }
 
+void ScreenCapture::captureScreen(int no_frames )
+{
+    int ii = 0;
+    int ret;
+
+    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        if( ii++ == no_frames )break;
+        if(pAVPacket->stream_index == VideoStreamIndx) {
+            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
+            if (ret >= 0) {
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
+
+                    exit(-2);
+                else if (ret < 0) {
+                    fprintf(stderr, "Error during decoding\n");
+                    exit( -1);
+                }
+            }
+        }
+    }
+}
+
+void ScreenCapture::scaleVideo(int no_frames) {
+//int video_outbuf_size;
+
+    AVPacket outPacket;
+
+    int nbytes = av_image_get_buffer_size(outAVCodecContext->pix_fmt,outAVCodecContext->width,outAVCodecContext->height,32);
+    uint8_t *video_outbuf = (uint8_t*)av_malloc(nbytes);
+    if( video_outbuf == NULL )
+    {
+        cout<<"\nunable to allocate memory";
+        exit(1);
+    }
+
+    // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
+    if(av_image_fill_arrays( outFrame->data, outFrame->linesize, video_outbuf , AV_PIX_FMT_YUV420P, outAVCodecContext->width,outAVCodecContext->height,1 )<0) // returns : the size in bytes required for src
+    {
+        cout<<"\nerror in filling image array";
+    }
+
+    SwsContext* swsCtx_ ;
+
+    // Allocate and return swsContext.
+    // a pointer to an allocated context, or NULL in case of error
+    // Deprecated : Use sws_getCachedContext() instead.
+    swsCtx_ = sws_getContext(pAVCodecContext->width,
+                             pAVCodecContext->height,
+                             pAVCodecContext->pix_fmt,
+                             outAVCodecContext->width,
+                             outAVCodecContext->height,
+                             outAVCodecContext->pix_fmt,
+                             SWS_BICUBIC, NULL, NULL, NULL);
+    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize,0, pAVCodecContext->height, outFrame->data,outFrame->linesize);
+        av_init_packet(&outPacket);
+        outPacket.data = NULL;    // packet data will be allocated by the encoder
+        outPacket.size = 0;
+        avcodec_send_frame(outAVCodecContext,outFrame);
+    }
+
+
+
+}
+void ScreenCapture::encodeVideo(int no_frames)
+{
+
+    AVPacket outPacket;
+    int ii = 0;
+
+    while (ii++ == no_frames ) {
+        if(avcodec_receive_packet(outAVCodecContext,&outPacket)>=0){
+            if(outPacket.pts != AV_NOPTS_VALUE)
+                outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
+            if(outPacket.dts != AV_NOPTS_VALUE)
+                outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
+            if(av_write_frame(outAVFormatContext , &outPacket) != 0) //avcodec_receive_packet()
+            {
+                cout<<"\nerror in writing video frame";
+
+            }
+            av_packet_unref(&outPacket);
+        }
+    }
+
+    if( av_write_trailer(outAVFormatContext) < 0)
+    {
+        cout<<"\nerror in writing av trailer";
+        exit(1);
+    }
+
+}

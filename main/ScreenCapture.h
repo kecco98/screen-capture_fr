@@ -71,17 +71,16 @@ private:
     int VideoStreamIndx;
     int codec_id;
 
+
 public:
 
     ScreenCapture();
     ~ScreenCapture();
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
-    void captureScreen(AVCodecContext* codecContext, AVFormatContext* formatContext, int streamIndex);
-    void rescaleVideo(AVCodecContext* inCodecContext, AVCodecContext* outCodecContext);
-    void videoSave(AVCodecContext* codecContext);
-
-
+    void captureScreen(int no_frames);
+    void scaleVideo(int no_frames);
+    void encodeVideo(int no_frames);
 
 
 
