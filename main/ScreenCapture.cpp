@@ -641,7 +641,7 @@ int ScreenCapture::startAudioRecording() {
     }
     int ii=0;
     while (av_read_frame(pAudioFormatContext, inPacket) >= 0 && inPacket->stream_index == audioStreamIndx) {
-        if( ii++ == 100 )break;
+        if( ii++ == 1800 )break;
             //decode audio routing
             av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
             if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
