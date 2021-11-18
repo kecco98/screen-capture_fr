@@ -79,12 +79,11 @@ private:
     AVCodecContext *pAudioCodecContext;
     AVCodec *outAudioCodec;
     AVCodecContext *outAudioCodecContext;
-
+    AVAudioFifo * fifo;
 
     int VideoStreamIndx;
     int audioStreamIndx;
     int outAudioStreamIndex = -1;
-    int fifo;
     int codec_id;
 
     std::mutex lock_sf;
