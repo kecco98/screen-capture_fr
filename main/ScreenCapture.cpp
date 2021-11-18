@@ -714,9 +714,7 @@ int ScreenCapture::startAudioRecording() {
         }
 }
 
-int ScreenCapture::initConvertedSamples(uint8_t*** converted_input_samples,
-                                         AVCodecContext* output_codec_context,
-                                         int frame_size) {
+int ScreenCapture::initConvertedSamples(uint8_t*** converted_input_samples, AVCodecContext* output_codec_context, int frame_size) {
     int error;
     /* Allocate as many pointers as there are audio channels.
      * Each pointer will later point to the audio samples of the corresponding

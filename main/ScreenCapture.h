@@ -94,6 +94,7 @@ public:
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
     int startAudioRecording();
+    int initConvertedSamples(uint8_t*** converted_input_samples, AVCodecContext* output_codec_context, int frame_size);
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/
