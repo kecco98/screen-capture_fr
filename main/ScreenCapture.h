@@ -8,6 +8,8 @@
 #include <cstring>
 #include <math.h>
 #include <string.h>
+#include <mutex>
+#include <condition_variable>
 
 #define __STDC_CONSTANT_MACROS
 
@@ -21,7 +23,10 @@ extern "C"
 
 #include "libavfilter/avfilter.h"
 //#include "../include/avfiltergraph.h"
-//#include "libavfilter/avfiltergraph.h"
+//#include "libavfilter/avfiltergraph.h"ti
+#include "libavutil/samplefmt.h"
+#include "libswresample/version.h"
+#include "libswresample/swresample.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 
@@ -76,8 +81,11 @@ private:
 
 
     int VideoStreamIndx;
+    int audioStreamIndx;
+    int outAudioStreamIndex = -1;
     int codec_id;
 
+    std::mutex lock_sf;
 
 public:
 
@@ -85,6 +93,7 @@ public:
     ~ScreenCapture();
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
+    int startAudioRecording();
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/

@@ -347,7 +347,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
     //find a free stream index
-    int outAudioStreamIndex = -1;
     for (i = 0; i < outAVFormatContext->nb_streams; i++) {
         if (outAVFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_UNKNOWN) {
             outAudioStreamIndex = i;
@@ -525,11 +524,13 @@ int ScreenCapture::startRecording() {
                             outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
                         if(outPacket.dts != AV_NOPTS_VALUE)
                             outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
+                        lock_sf.lock();
                         if(av_write_frame(outAVFormatContext , &outPacket) != 0) //avcodec_receive_packet()
                         {
                             cout<<"\nerror in writing video frame";
 
                         }
+                        lock_sf.unlock();
                         av_packet_unref(&outPacket);
                     }
                 }
@@ -572,6 +573,145 @@ int ScreenCapture::startRecording() {
 //THIS WAS ADDED LATER
     av_free(video_outbuf);  //lasciami qui
 
+}
+
+int ScreenCapture::startAudioRecording() {
+    int ret;
+    AVPacket* inPacket, * outPacket;
+    AVFrame* rawFrame, * scaledFrame;
+    uint8_t** resampledData;
+
+    //allocate space for a packet
+    inPacket = (AVPacket*)av_malloc(sizeof(AVPacket));
+    if (!inPacket) {
+        cerr << "Cannot allocate an AVPacket for encoded video" << endl;
+        exit(1);
+    }
+    av_init_packet(inPacket);
+
+    //allocate space for a packet
+    rawFrame = av_frame_alloc();
+    if (!rawFrame) {
+        cerr << "Cannot allocate an AVPacket for encoded video" << endl;
+        exit(1);
+    }
+
+    scaledFrame = av_frame_alloc();
+    if (!scaledFrame) {
+        cerr << "Cannot allocate an AVPacket for encoded video" << endl;
+        exit(1);
+    }
+
+    outPacket = (AVPacket*)av_malloc(sizeof(AVPacket));
+    if (!outPacket) {
+        cerr << "Cannot allocate an AVPacket for encoded video" << endl;
+        exit(1);
+    }
+
+    //init the resampler
+    SwrContext* resampleContext = nullptr;
+    resampleContext = swr_alloc_set_opts(resampleContext,
+                                         av_get_default_channel_layout(outAudioCodecContext->channels),
+                                         outAudioCodecContext->sample_fmt,
+                                         outAudioCodecContext->sample_rate,
+                                         av_get_default_channel_layout(pAudioCodecContext->channels),
+                                         pAudioCodecContext->sample_fmt,
+                                         pAudioCodecContext->sample_rate,
+                                         0,
+                                         nullptr);
+    if (!resampleContext) {
+        cerr << "Cannot allocate the resample context" << endl;
+        exit(1);
+    }
+    if ((swr_init(resampleContext)) < 0) {
+        fprintf(stderr, "Could not open resample context\n");
+        swr_free(&resampleContext);
+        exit(1);
+    }
+
+    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 && inPacket->stream_index == audioStreamIndx) {
+            //decode audio routing
+            av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
+            if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
+                cout << "Cannot decode current audio packet " << ret << endl;
+                continue;
+            }
+
+            while (ret >= 0) {
+                ret = avcodec_receive_frame(pAudioCodecContext, rawFrame);
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                    break;
+                else if (ret < 0) {
+                    cerr << "Error during decoding" << endl;
+                    exit(1);
+                }
+
+                if (outAVFormatContext->streams[outAudioStreamIndex]->start_time <= 0) {
+                    outAVFormatContext->streams[outAudioStreamIndex]->start_time = rawFrame->pts;
+                }
+                initConvertedSamples(&resampledData, outAudioCodecContext, rawFrame->nb_samples);
+
+                swr_convert(resampleContext,
+                            resampledData, rawFrame->nb_samples,
+                            (const uint8_t**)rawFrame->extended_data, rawFrame->nb_samp
+
+                add_samples_to_fifo(resampledData, rawFrame->nb_samples);
+
+                //raw frame ready
+                av_init_packet(outPacket);
+                outPacket->data = nullptr;
+                outPacket->size = 0;
+
+                const int frame_size = FFMAX(av_audio_fifo_size(fifo), outAudioCodecContext->frame_size);
+
+                scaledFrame = av_frame_alloc();
+                if (!scaledFrame) {
+                    cerr << "Cannot allocate an AVPacket for encoded video" << endl;
+                    exit(1);
+                }
+
+                scaledFrame->nb_samples = outAudioCodecContext->frame_size;
+                scaledFrame->channel_layout = outAudioCodecContext->channel_layout;
+                scaledFrame->format = outAudioCodecContext->sample_fmt;
+                scaledFrame->sample_rate = outAudioCodecContext->sample_rate;
+                av_frame_get_buffer(scaledFrame, 0);
+
+                while (av_audio_fifo_size(fifo) >= outAudioCodecContext->frame_size) {
+
+                    ret = av_audio_fifo_read(fifo, (void**)(scaledFrame->data), outAudioCodecContext->frame_size);
+                    scaledFrame->pts = pts;
+                    pts += scaledFrame->nb_samples;
+                    if (avcodec_send_frame(outAudioCodecContext, scaledFrame) < 0) {
+                        cout << "Cannot encode current audio packet " << endl;
+                        exit(1);
+                    }
+                    while (ret >= 0) {
+                        ret = avcodec_receive_packet(outAudioCodecContext, outPacket);
+                        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                            break;
+                        else if (ret < 0) {
+                            cerr << "Error during encoding" << endl;
+                            exit(1);
+                        }
+                        av_packet_rescale_ts(outPacket, outAudioCodecContext->time_base, outAVFormatContext->streams[outAudioStreamIndex]->time_base);
+
+                        outPacket->stream_index = outAudioStreamIndex;
+
+                        write_lock.lock();
+
+                        if (av_write_frame(outAVFormatContext, outPacket) != 0)
+                        {
+                            cerr << "Error in writing audio frame" << endl;
+                        }
+                        write_lock.unlock();
+                        av_packet_unref(outPacket);
+                    }
+                    ret = 0;
+                }
+                av_frame_free(&scaledFrame);
+                av_packet_unref(outPacket);
+            }
+        }
 }
 
 /*
