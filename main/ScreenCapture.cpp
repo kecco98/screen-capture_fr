@@ -714,6 +714,31 @@ int ScreenCapture::startAudioRecording() {
         }
 }
 
+int ScreenCapture::initConvertedSamples(uint8_t*** converted_input_samples,
+                                         AVCodecContext* output_codec_context,
+                                         int frame_size) {
+    int error;
+    /* Allocate as many pointers as there are audio channels.
+     * Each pointer will later point to the audio samples of the corresponding
+     * channels (although it may be NULL for interleaved formats).
+     */
+    if (!(*converted_input_samples = (uint8_t**)calloc(output_codec_context->channels,
+                                                       sizeof(**converted_input_samples)))) {
+        fprintf(stderr, "Could not allocate converted input sample pointers\n");
+        return AVERROR(ENOMEM);
+    }
+    /* Allocate memory for the samples of all channels in one consecutive
+     * block for convenience. */
+    if (av_samples_alloc(*converted_input_samples, nullptr,
+                         output_codec_context->channels,
+                         frame_size,
+                         output_codec_context->sample_fmt, 0) < 0) {
+
+        exit(1);
+    }
+    return 0;
+}
+
 /*
 void ScreenCapture::captureScreen(int no_frames )
 {
