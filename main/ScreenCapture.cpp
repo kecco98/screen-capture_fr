@@ -655,8 +655,7 @@ int ScreenCapture::startAudioRecording() {
 
                 swr_convert(resampleContext,
                             resampledData, rawFrame->nb_samples,
-                            (const uint8_t**)rawFrame->extended_data, rawFrame->nb_samp
-
+                            (const uint8_t**)rawFrame->extended_data, rawFrame->nb_samples);
                 add_samples_to_fifo(resampledData, rawFrame->nb_samples);
 
                 //raw frame ready
@@ -730,6 +729,7 @@ int ScreenCapture::add_samples_to_fifo(uint8_t** converted_input_samples, const 
     int error;
     /* Make the FIFO as large as it needs to be to hold both,
      * the old and the new samples. */
+
     if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frame_size)) < 0) {
         fprintf(stderr, "Could not reallocate FIFO\n");
         return error;
