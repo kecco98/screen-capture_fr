@@ -2,7 +2,7 @@
 // Created by kecco on 30/10/21.
 //
 
-
+#include <thread>
 #include "ScreenCapture.h"
 
 using namespace std;
@@ -57,14 +57,14 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     //The distance from the top edge of the screen or desktop
     //av_dict_set(&options,"offset_y","40",0);
 
-  if(av_dict_set( &options,"framerate","30",0 ) < 0)
+    if(av_dict_set( &options,"framerate","30",0 ) < 0)
     {
         cout<<"\nerror in setting dictionary value";
         exit(2);
     }
 
 
-  if(av_dict_set( &options,"video_size",conc,0 ) < 0)
+    if(av_dict_set( &options,"video_size",conc,0 ) < 0)
     {
         cout<<"\nerror in setting video size";
         exit(3);
@@ -78,15 +78,15 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 
-   if (av_dict_set(&options, "probesize", "60M", 0) < 0) {
+    if (av_dict_set(&options, "probesize", "60M", 0) < 0) {
         cerr << "Error in setting probesize value" << endl;
         exit(-1);
     }
-  /*if(av_dict_set_int( &options,"height",1000,0 ) < 0)
-    {
-        cout<<"\nerror in setting dictionary value";
-        exit(4);
-    }*/
+    /*if(av_dict_set_int( &options,"height",1000,0 ) < 0)
+      {
+          cout<<"\nerror in setting dictionary value";
+          exit(4);
+      }*/
 
 
     if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) //da fare forse per il pausa e riprendi
@@ -165,7 +165,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 //#if defined linux
     pAudioInputFormat = av_find_input_format("alsa");
-    if (avformat_open_input(&pAudioFormatContext, "hw:0", pAudioInputFormat, &audioOptions) != 0) {
+    if (avformat_open_input(&pAudioFormatContext, "hw:2", pAudioInputFormat, &audioOptions) != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
@@ -212,8 +212,8 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }
 
 
- /*   *//* set property of the video file *//*
-    outAVCodecContext = video_st->codec;
+    /* set property of the video file */
+    /*outAVCodecContext = video_st->codec;
     //avcodec_parameters_to_context(outAVCodecContext, video_st->codecpar);
 
     outAVCodecContext->codec_id = AV_CODEC_ID_MPEG4;// AV_CODEC_ID_MPEG4; // AV_CODEC_ID_H264 // AV_CODEC_ID_MPEG1VIDEO
@@ -255,11 +255,11 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
       height2 = DisplayHeight(dpy, snum);
       printf("display size is %d x %d\n", width2, height2);*/
 
-   //Per un altra codifica!!
- /*   if (codec_id == AV_CODEC_ID_H264)
-    {
-        av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
-    }*/
+    //Per un altra codifica!!
+    /*   if (codec_id == AV_CODEC_ID_H264)
+       {
+           av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
+       }*/
 
     outAVCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);//prenderlo da sopra!!!
     if( !outAVCodec )
@@ -397,8 +397,8 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
     pAVFrame = av_frame_alloc();
     //pAVFrame->width=width;
-   // pAVFrame->height=height;
-   // pAVFrame->format=AV_PIX_FMT_YUV420P;
+    // pAVFrame->height=height;
+    // pAVFrame->format=AV_PIX_FMT_YUV420P;
 
     if( !pAVFrame )
     {
@@ -446,15 +446,15 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     }*/
 
 int ScreenCapture::startRecording() {
-     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
-     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
+    videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
+    audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
 
 
 }
 
 
 int ScreenCapture::startVideoRecording() {
- //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
+    //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
 
     int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
 
@@ -505,28 +505,28 @@ int ScreenCapture::startVideoRecording() {
         if(pAVPacket->stream_index == VideoStreamIndx)
         {
 
-           // if( avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket ) < 0)
+            // if( avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket ) < 0)
             //{
-              //  cout<<"unable to decode video";
-           // }
+            //  cout<<"unable to decode video";
+            // }
             ret=avcodec_send_packet(pAVCodecContext,pAVPacket);
             if(ret>=0){
                 ret= avcodec_receive_frame(pAVCodecContext,pAVFrame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
 
-                               return -2;
-                        else if (ret < 0) {
-                                fprintf(stderr, "Error during decoding\n");
-                                return -1 ;
-                             }
+                    return -2;
+                else if (ret < 0) {
+                    fprintf(stderr, "Error during decoding\n");
+                    return -1 ;
+                }
 
                 sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize,0, pAVCodecContext->height, outFrame->data,outFrame->linesize);
                 av_init_packet(&outPacket);
                 outPacket.data = NULL;    // packet data will be allocated by the encoder
                 outPacket.size = 0;
 
-               // avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);//avcodec_send_frame()
-              if(avcodec_send_frame(outAVCodecContext,outFrame)>=0){
+                // avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);//avcodec_send_frame()
+                if(avcodec_send_frame(outAVCodecContext,outFrame)>=0){
                     //cout<<"si";
                     if(avcodec_receive_packet(outAVCodecContext,&outPacket)>=0){
                         if(outPacket.pts != AV_NOPTS_VALUE)
@@ -544,23 +544,23 @@ int ScreenCapture::startVideoRecording() {
                     }
                 }
 
-             /* if(got_picture)
-                {
-                    if(outPacket.pts != AV_NOPTS_VALUE)
-                        outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
-                    if(outPacket.dts != AV_NOPTS_VALUE)
-                        outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
+                /* if(got_picture)
+                   {
+                       if(outPacket.pts != AV_NOPTS_VALUE)
+                           outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
+                       if(outPacket.dts != AV_NOPTS_VALUE)
+                           outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
 
-                    printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
-                    if(av_write_frame(outAVFormatContext , &outPacket) != 0) //avcodec_receive_packet()
-                    {
-                        cout<<"\nerror in writing video frame";
-                    }
+                       printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
+                       if(av_write_frame(outAVFormatContext , &outPacket) != 0) //avcodec_receive_packet()
+                       {
+                           cout<<"\nerror in writing video frame";
+                       }
 
-                    av_packet_unref(&outPacket);
-                } // got_picture*/
+                       av_packet_unref(&outPacket);
+                   } // got_picture*/
 
-              // av_packet_unref(&outPacket);
+                // av_packet_unref(&outPacket);
             } // frameFinished
 
         }
@@ -640,90 +640,90 @@ int ScreenCapture::startAudioRecording() {
         exit(1);
     }
     int ii=0;
-    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 && inPacket->stream_index == audioStreamIndx) {
-        if( ii++ == 1800 )break;
-            //decode audio routing
-            av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
-            if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
-                cout << "Cannot decode current audio packet " << ret << endl;
-                continue;
+    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
+        if( ii++ == 1800  )break;
+        //decode audio routing
+        av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
+        if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
+            cout << "Cannot decode current audio packet " << ret << endl;
+            continue;
+        }
+
+        while (ret >= 0) {
+            ret = avcodec_receive_frame(pAudioCodecContext, rawFrame);
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                break;
+            else if (ret < 0) {
+                cerr << "Error during decoding" << endl;
+                exit(1);
             }
 
-            while (ret >= 0) {
-                ret = avcodec_receive_frame(pAudioCodecContext, rawFrame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-                    break;
-                else if (ret < 0) {
-                    cerr << "Error during decoding" << endl;
+            if (outAVFormatContext->streams[outAudioStreamIndex]->start_time <= 0) {
+                outAVFormatContext->streams[outAudioStreamIndex]->start_time = rawFrame->pts;
+            }
+            initConvertedSamples(&resampledData, outAudioCodecContext, rawFrame->nb_samples);
+
+            swr_convert(resampleContext,
+                        resampledData, rawFrame->nb_samples,
+                        (const uint8_t**)rawFrame->extended_data, rawFrame->nb_samples);
+            add_samples_to_fifo(resampledData, rawFrame->nb_samples);
+
+            //raw frame ready
+            av_init_packet(outPacket);
+            outPacket->data = nullptr;
+            outPacket->size = 0;
+
+            const int frame_size = FFMAX(av_audio_fifo_size(fifo), outAudioCodecContext->frame_size);
+
+            scaledFrame = av_frame_alloc();
+            if (!scaledFrame) {
+                cerr << "Cannot allocate an AVPacket for encoded video" << endl;
+                exit(1);
+            }
+
+            scaledFrame->nb_samples = outAudioCodecContext->frame_size;
+            scaledFrame->channel_layout = outAudioCodecContext->channel_layout;
+            scaledFrame->format = outAudioCodecContext->sample_fmt;
+            scaledFrame->sample_rate = outAudioCodecContext->sample_rate;
+            av_frame_get_buffer(scaledFrame, 0);
+
+            while (av_audio_fifo_size(fifo) >= outAudioCodecContext->frame_size) {
+
+                ret = av_audio_fifo_read(fifo, (void**)(scaledFrame->data), outAudioCodecContext->frame_size);
+
+                scaledFrame->pts = pts;
+                pts += scaledFrame->nb_samples;
+                if (avcodec_send_frame(outAudioCodecContext, scaledFrame) < 0) {
+                    cout << "Cannot encode current audio packet " << endl;
                     exit(1);
                 }
-
-                if (outAVFormatContext->streams[outAudioStreamIndex]->start_time <= 0) {
-                    outAVFormatContext->streams[outAudioStreamIndex]->start_time = rawFrame->pts;
-                }
-                initConvertedSamples(&resampledData, outAudioCodecContext, rawFrame->nb_samples);
-
-                swr_convert(resampleContext,
-                            resampledData, rawFrame->nb_samples,
-                            (const uint8_t**)rawFrame->extended_data, rawFrame->nb_samples);
-                add_samples_to_fifo(resampledData, rawFrame->nb_samples);
-
-                //raw frame ready
-                av_init_packet(outPacket);
-                outPacket->data = nullptr;
-                outPacket->size = 0;
-
-                const int frame_size = FFMAX(av_audio_fifo_size(fifo), outAudioCodecContext->frame_size);
-
-                scaledFrame = av_frame_alloc();
-                if (!scaledFrame) {
-                    cerr << "Cannot allocate an AVPacket for encoded video" << endl;
-                    exit(1);
-                }
-
-                scaledFrame->nb_samples = outAudioCodecContext->frame_size;
-                scaledFrame->channel_layout = outAudioCodecContext->channel_layout;
-                scaledFrame->format = outAudioCodecContext->sample_fmt;
-                scaledFrame->sample_rate = outAudioCodecContext->sample_rate;
-                av_frame_get_buffer(scaledFrame, 0);
-
-                while (av_audio_fifo_size(fifo) >= outAudioCodecContext->frame_size) {
-
-                    ret = av_audio_fifo_read(fifo, (void**)(scaledFrame->data), outAudioCodecContext->frame_size);
-
-                    scaledFrame->pts = pts;
-                    pts += scaledFrame->nb_samples;
-                    if (avcodec_send_frame(outAudioCodecContext, scaledFrame) < 0) {
-                        cout << "Cannot encode current audio packet " << endl;
+                while (ret >= 0) {
+                    ret = avcodec_receive_packet(outAudioCodecContext, outPacket);
+                    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                        break;
+                    else if (ret < 0) {
+                        cerr << "Error during encoding" << endl;
                         exit(1);
                     }
-                    while (ret >= 0) {
-                        ret = avcodec_receive_packet(outAudioCodecContext, outPacket);
-                        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-                            break;
-                        else if (ret < 0) {
-                            cerr << "Error during encoding" << endl;
-                            exit(1);
-                        }
-                        av_packet_rescale_ts(outPacket, outAudioCodecContext->time_base, outAVFormatContext->streams[outAudioStreamIndex]->time_base);
+                    av_packet_rescale_ts(outPacket, outAudioCodecContext->time_base, outAVFormatContext->streams[outAudioStreamIndex]->time_base);
 
-                        outPacket->stream_index = outAudioStreamIndex;
+                    outPacket->stream_index = outAudioStreamIndex;
 
-                        lock_sf.lock();
+                    lock_sf.lock();
 
-                        if (av_write_frame(outAVFormatContext, outPacket) != 0)
-                        {
-                            cerr << "Error in writing audio frame" << endl;
-                        }
-                        lock_sf.unlock();
-                        av_packet_unref(outPacket);
+                    if (av_write_frame(outAVFormatContext, outPacket) != 0)
+                    {
+                        cerr << "Error in writing audio frame" << endl;
                     }
-                    ret = 0;
+                    lock_sf.unlock();
+                    av_packet_unref(outPacket);
                 }
-                av_frame_free(&scaledFrame);
-                av_packet_unref(outPacket);
+                ret = 0;
             }
+            av_frame_free(&scaledFrame);
+            av_packet_unref(outPacket);
         }
+    }
 }
 int ScreenCapture::init_fifo()
 {
