@@ -14,6 +14,8 @@ ScreenCapture::ScreenCapture(){
 }
 
 ScreenCapture::~ScreenCapture(){
+    videoStream->join();
+    audioStream->join();
     avformat_close_input(&pAVFormatContext);
     if( !pAVFormatContext )
     {
@@ -35,8 +37,7 @@ ScreenCapture::~ScreenCapture(){
         cout<<"\nunable to free avformat context";
         exit(1);
     }
-    videoStream->join();
-    audioStream->join();
+
 }
 
 
@@ -446,7 +447,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 int ScreenCapture::startRecording() {
      videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
-     //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
+     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
 
 
 }
