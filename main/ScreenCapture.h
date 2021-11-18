@@ -10,6 +10,7 @@
 #include <string.h>
 #include <mutex>
 #include <condition_variable>
+#include<thread>
 
 #define __STDC_CONSTANT_MACROS
 
@@ -85,8 +86,11 @@ private:
     int audioStreamIndx;
     int outAudioStreamIndex = -1;
     int codec_id;
-
+    int64_t pts = 0;
     std::mutex lock_sf;
+
+    std::thread *videoStream;
+    std::thread *audioStream;
 
 public:
 
@@ -95,6 +99,7 @@ public:
     int setup(const char* output, int width, int height, const char* conc);
     int startRecording();
     int startAudioRecording();
+    int startVideoRecording();
     int initConvertedSamples(uint8_t*** converted_input_samples, AVCodecContext* output_codec_context, int frame_size);
     int init_fifo();
     int add_samples_to_fifo(uint8_t **converted_input_samples, const int frame_size);

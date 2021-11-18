@@ -2,7 +2,7 @@
 // Created by kecco on 30/10/21.
 //
 
-#include <thread>
+
 #include "ScreenCapture.h"
 
 using namespace std;
@@ -35,6 +35,8 @@ ScreenCapture::~ScreenCapture(){
         cout<<"\nunable to free avformat context";
         exit(1);
     }
+    videoStream->join();
+    audioStream->join();
 }
 
 
@@ -442,9 +444,15 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
     }*/
 
-
-
 int ScreenCapture::startRecording() {
+     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
+     //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
+
+
+}
+
+
+int ScreenCapture::startVideoRecording() {
  //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
 
     int frameFinished;//when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
@@ -630,8 +638,9 @@ int ScreenCapture::startAudioRecording() {
         swr_free(&resampleContext);
         exit(1);
     }
-
+    int ii=0;
     while (av_read_frame(pAudioFormatContext, inPacket) >= 0 && inPacket->stream_index == audioStreamIndx) {
+        if( ii++ == 100 )break;
             //decode audio routing
             av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
             if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
@@ -680,6 +689,7 @@ int ScreenCapture::startAudioRecording() {
                 while (av_audio_fifo_size(fifo) >= outAudioCodecContext->frame_size) {
 
                     ret = av_audio_fifo_read(fifo, (void**)(scaledFrame->data), outAudioCodecContext->frame_size);
+
                     scaledFrame->pts = pts;
                     pts += scaledFrame->nb_samples;
                     if (avcodec_send_frame(outAudioCodecContext, scaledFrame) < 0) {
@@ -698,13 +708,13 @@ int ScreenCapture::startAudioRecording() {
 
                         outPacket->stream_index = outAudioStreamIndex;
 
-                        write_lock.lock();
+                        lock_sf.lock();
 
                         if (av_write_frame(outAVFormatContext, outPacket) != 0)
                         {
                             cerr << "Error in writing audio frame" << endl;
                         }
-                        write_lock.unlock();
+                        lock_sf.unlock();
                         av_packet_unref(outPacket);
                     }
                     ret = 0;
@@ -862,3 +872,4 @@ void ScreenCapture::encodeVideo(int no_frames)
 
 
 }*/
+
