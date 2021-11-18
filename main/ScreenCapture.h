@@ -29,6 +29,7 @@ extern "C"
 #include "libswresample/swresample.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
+#include "libavutil/audio_fifo.h"
 
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
