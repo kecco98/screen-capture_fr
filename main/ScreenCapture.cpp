@@ -26,7 +26,7 @@ ScreenCapture::~ScreenCapture(){
         exit(1);
     }
 
-    avformat_free_context(pAVFormatContext);
+   /* avformat_free_context(pAVFormatContext);
     avformat_free_context(pAudioFormatContext);
     if( !pAudioFormatContext && !pAVFormatContext)
     {
@@ -36,7 +36,7 @@ ScreenCapture::~ScreenCapture(){
     {
         cout<<"\nunable to free avformat context";
         exit(1);
-    }
+    }*/
 
     avformat_close_input(&pAudioFormatContext);
     if(pAVFormatContext == nullptr){
@@ -45,7 +45,14 @@ ScreenCapture::~ScreenCapture(){
         cerr<<"Error: unable to close the file";
         exit(-1);
     }
-
+    //pAudioCodecContext
+    av_free(pAudioCodecContext);
+    if(pAudioCodecContext == nullptr){
+        cout<<"Flie close succesfully"<<endl;
+    } else {
+        cerr<<"Error: unable to close the file";
+        exit(-1);
+    }
 
 
 }
@@ -163,6 +170,9 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     pAudioFormatContext = nullptr;
 
     pAudioFormatContext = avformat_alloc_context();
+    if(pAudioFormatContext==nullptr){
+        cerr << "Error: paudiocontext" << endl;
+    }
     if ( av_dict_set(&audioOptions, "sample_rate", "44100", 0) < 0) {
         cerr << "Error: cannot set audio sample rate" << endl;
         exit(-1);
@@ -172,6 +182,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cerr << "Error: cannot set audio sample rate" << endl;
         exit(-1);
     }
+    av_dict_set(&audioOptions, "audio_device_number", "0", 0);
 
 //#if defined linux
     pAudioInputFormat = av_find_input_format("alsa");
