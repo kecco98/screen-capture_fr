@@ -188,11 +188,16 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cerr << "Error: cannot set audio sample rate" << endl;
         exit(-1);
     }
-    av_dict_set(&audioOptions, "audio_device_number", "0", 0);
+    //av_dict_set(&audioOptions, "audio_device_number", "0", 0);
+    //av_dict_set(&audioOptions, "thread_queue_size", "4096", 0);
 
 //#if defined linux
-    pAudioInputFormat = av_find_input_format("alsa");
-    if (avformat_open_input(&pAudioFormatContext, "hw:0", pAudioInputFormat, &audioOptions) != 0) {
+    //pAudioInputFormat = av_find_input_format("alsa");
+    string deviceName;
+    if(deviceName == "") deviceName = "default";
+    pAudioInputFormat =av_find_input_format("pulse");
+
+    if (avformat_open_input(&pAudioFormatContext, deviceName.c_str(), pAudioInputFormat, &audioOptions) != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
@@ -522,10 +527,10 @@ int ScreenCapture::startVideoRecording() {
 
 
 
-    int no_frames = 100;
-    cout<<"\nenter No. of frames to capture : ";
+    int no_frames = 200;
+   /* cout<<"\nenter No. of frames to capture : ";
     cin>>no_frames;
-
+*/
     AVPacket outPacket;
     int ii=0;
     int ret;
@@ -670,10 +675,13 @@ int ScreenCapture::startAudioRecording() {
         exit(1);
     }
     int ii=0;
-    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
+    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 && inPacket->stream_index == audioStreamIndx) {
         if( ii++ == 200  )break;
         //decode audio routing
+
+
         av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
+
         if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
             cout << "Cannot decode current audio packet " << ret << endl;
             continue;
