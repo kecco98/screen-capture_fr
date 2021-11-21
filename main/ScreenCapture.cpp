@@ -46,7 +46,9 @@ ScreenCapture::~ScreenCapture(){
         exit(-1);
     }
     //pAudioCodecContext
-    av_free(pAudioCodecContext);
+   // avcodec_close(pAudioCodecContext);
+    //av_free(pAudioCodecContext);
+    avcodec_free_context(&pAudioCodecContext);
     if(pAudioCodecContext == nullptr){
         cout<<"Flie close succesfully"<<endl;
     } else {
