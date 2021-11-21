@@ -55,8 +55,11 @@ ScreenCapture::~ScreenCapture(){
         cerr<<"Error: unable to close the file";
         exit(-1);
     }
+   // avcodec_free_context(&pAVCodecContext); gia fatta
 
-
+    avformat_close_input(&outAVFormatContext);
+    avcodec_free_context(&outAudioCodecContext);
+    //avcodec_free_context(&outAVCodecContext);gia fatta
 }
 
 
