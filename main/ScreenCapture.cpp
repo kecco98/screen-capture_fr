@@ -15,7 +15,6 @@ ScreenCapture::ScreenCapture(){
 
 ScreenCapture::~ScreenCapture(){
 
-
     avformat_close_input(&pAVFormatContext);
     if( !pAVFormatContext )
     {
@@ -28,7 +27,8 @@ ScreenCapture::~ScreenCapture(){
     }
 
     avformat_free_context(pAVFormatContext);
-    if( !pAVFormatContext )
+    avformat_free_context(pAudioFormatContext);
+    if( !pAudioFormatContext && !pAVFormatContext)
     {
         cout<<"\navformat free successfully";
     }
@@ -37,6 +37,16 @@ ScreenCapture::~ScreenCapture(){
         cout<<"\nunable to free avformat context";
         exit(1);
     }
+
+    avformat_close_input(&pAudioFormatContext);
+    if(pAVFormatContext == nullptr){
+        cout<<"Flie close succesfully"<<endl;
+    } else {
+        cerr<<"Error: unable to close the file";
+        exit(-1);
+    }
+
+
 
 }
 
