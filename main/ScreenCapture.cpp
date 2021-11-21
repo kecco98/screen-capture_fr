@@ -14,8 +14,8 @@ ScreenCapture::ScreenCapture(){
 }
 
 ScreenCapture::~ScreenCapture(){
-    videoStream->join();
-    audioStream->join();
+
+
     avformat_close_input(&pAVFormatContext);
     if( !pAVFormatContext )
     {
@@ -165,7 +165,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 //#if defined linux
     pAudioInputFormat = av_find_input_format("alsa");
-    if (avformat_open_input(&pAudioFormatContext, "hw:2", pAudioInputFormat, &audioOptions) != 0) {
+    if (avformat_open_input(&pAudioFormatContext, "hw:0", pAudioInputFormat, &audioOptions) != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
@@ -449,6 +449,8 @@ int ScreenCapture::startRecording() {
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
 
+    videoStream->join();
+    audioStream->join();
 
 }
 
@@ -641,7 +643,7 @@ int ScreenCapture::startAudioRecording() {
     }
     int ii=0;
     while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
-        if( ii++ == 1800  )break;
+        if( ii++ == 200  )break;
         //decode audio routing
         av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
         if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
@@ -722,8 +724,10 @@ int ScreenCapture::startAudioRecording() {
             }
             av_frame_free(&scaledFrame);
             av_packet_unref(outPacket);
+
         }
     }
+    swr_free(&resampleContext);
 }
 int ScreenCapture::init_fifo()
 {
