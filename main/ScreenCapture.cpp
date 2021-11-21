@@ -28,7 +28,8 @@ ScreenCapture::~ScreenCapture(){
 
    /* avformat_free_context(pAVFormatContext);
     avformat_free_context(pAudioFormatContext);
-    if( !pAudioFormatContext && !pAVFormatContext)
+    avformat_free_context(outAVFormatContext);
+    if( !pAudioFormatContext && !pAVFormatContext && !outAudioCodecContext)
     {
         cout<<"\navformat free successfully";
     }
@@ -230,13 +231,14 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(1);
     }
 
+    outAVCodec=nullptr;
+
     outAVCodecContext = avcodec_alloc_context3(outAVCodec);//outAvCodec nullo cosi in auto sceflie il settaggio migliore per il ctx
     if( !outAVCodecContext )
     {
         cout<<"\nerror in allocating the codec contexts";
         exit(1);
     }
-
 
     /* set property of the video file */
     /*outAVCodecContext = video_st->codec;
