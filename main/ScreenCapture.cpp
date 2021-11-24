@@ -201,7 +201,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 //#if defined linux
     pAudioInputFormat = av_find_input_format("alsa");
     /*string deviceName;
-    if(deviceName == "") deviceName = "default";*/
+    if(deviceName == "") deviceName = "default"; */
    // pAudioInputFormat =av_find_input_format("pulseaudio");
 
     if (avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions) != 0) {
