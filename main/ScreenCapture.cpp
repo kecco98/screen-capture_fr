@@ -224,7 +224,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(-1);
     }
 
-    int audioStreamIndx = -1;
     for (int i = 0; i < pAudioFormatContext->nb_streams; i++) {
         if (pAudioFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             audioStreamIndx = i;
@@ -493,7 +492,7 @@ int ScreenCapture::startRecording() {
     videoStream->join();
     audioStream->join();
 
-
+  return 1;
 
 }
 

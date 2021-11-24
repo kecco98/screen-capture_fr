@@ -82,7 +82,7 @@ private:
     AVCodecContext *outAudioCodecContext;
     AVAudioFifo * fifo;
 
-    int VideoStreamIndx;
+    int VideoStreamIndx=-1;
     int audioStreamIndx=-1;
     int outAudioStreamIndex = -1;
     int codec_id;
