@@ -15,6 +15,13 @@ ScreenCapture::ScreenCapture(){
 
 ScreenCapture::~ScreenCapture(){
 
+
+
+    if (av_write_trailer(outAVFormatContext) < 0) {
+        cerr << "Error in writing av trailer" << endl;
+        exit(-1);
+    }
+
     avformat_close_input(&pAVFormatContext);
     if( !pAVFormatContext )
     {
@@ -192,12 +199,12 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     //av_dict_set(&audioOptions, "thread_queue_size", "4096", 0);
 
 //#if defined linux
-    //pAudioInputFormat = av_find_input_format("alsa");
-    string deviceName;
-    if(deviceName == "") deviceName = "default";
-    pAudioInputFormat =av_find_input_format("pulse");
+    pAudioInputFormat = av_find_input_format("alsa");
+    /*string deviceName;
+    if(deviceName == "") deviceName = "default";*/
+   // pAudioInputFormat =av_find_input_format("pulseaudio");
 
-    if (avformat_open_input(&pAudioFormatContext, deviceName.c_str(), pAudioInputFormat, &audioOptions) != 0) {
+    if (avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions) != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
@@ -450,6 +457,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(1);
     }
 
+    return 10;
 }
 /*void ScreenCapture::captureScreen(int no_frames )
 {
@@ -484,6 +492,8 @@ int ScreenCapture::startRecording() {
 
     videoStream->join();
     audioStream->join();
+
+
 
 }
 
@@ -602,11 +612,7 @@ int ScreenCapture::startVideoRecording() {
     }// End of while-loop
 
 
-    if( av_write_trailer(outAVFormatContext) < 0)
-    {
-        cout<<"\nerror in writing av trailer";
-        exit(1);
-    }
+
     /*
     auto demux = new thread(&ScreenCapture::captureScreen, this, no_frames);
 
@@ -675,8 +681,9 @@ int ScreenCapture::startAudioRecording() {
         exit(1);
     }
     int ii=0;
-    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 && inPacket->stream_index == audioStreamIndx) {
-        if( ii++ == 200  )break;
+
+    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
+        if( ii++ == 2400  )break;
         //decode audio routing
 
 

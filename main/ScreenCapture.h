@@ -83,12 +83,12 @@ private:
     AVAudioFifo * fifo;
 
     int VideoStreamIndx;
-    int audioStreamIndx;
+    int audioStreamIndx=-1;
     int outAudioStreamIndex = -1;
     int codec_id;
     int64_t pts = 0;
     std::mutex lock_sf;
-
+    std::mutex fin;
     std::thread *videoStream;
     std::thread *audioStream;
 
