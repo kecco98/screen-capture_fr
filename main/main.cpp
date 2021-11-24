@@ -31,8 +31,8 @@ int main()
     conc = co.c_str();
     cout<< conc;
 
-    cout<<video_record.setup(output, width, height, conc);
-    cout<<"video finishied ?"<<video_record.startRecording();
+    video_record.setup(output, width, height, conc);
+    video_record.startRecording();
 
     cout<<"\nProgram executed successfully"<<endl;
 
