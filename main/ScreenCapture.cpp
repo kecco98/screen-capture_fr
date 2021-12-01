@@ -489,14 +489,18 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 int ScreenCapture::genMenu() {
 
-
+    int a;
+    cin>>a;
+    running=true;
+    cv_s.notify_all();
     return 0;
 }
 
 int ScreenCapture::start() {
+    unique_lock<mutex> ul(lock_running);
 
     menu= new std::thread(&ScreenCapture::genMenu,this);
-    unique_lock<mutex> ul(lock_running);
+
     cv_s.wait(ul,[this](){return running;});
 
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);

@@ -32,7 +32,7 @@ int main()
     cout<< conc;
 
     video_record.setup(output, width, height, conc);
-    video_record.startRecording();
+    video_record.start();
 
     cout<<"\nProgram executed successfully"<<endl;
 
