@@ -511,6 +511,7 @@ int ScreenCapture::genMenu() {
                     cv_a.notify_all();
                     cv_v.notify_all();
                     cout<<"Restart recording!"<<endl;
+
                 }
             }
         } else if(p=='t'){
