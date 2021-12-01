@@ -508,6 +508,9 @@ int ScreenCapture::genMenu() {
                 cin>>r;
                 if(r=='r'){
                     pause=false;
+                    cv_a.notify_all();
+                    cv_v.notify_all();
+                    cout<<"Restart recording!"<<endl;
                 }
             }
         } else if(p=='t'){
@@ -521,7 +524,7 @@ int ScreenCapture::genMenu() {
 
 int ScreenCapture::start() {
     unique_lock<mutex> lr(lock_running);
-    unique_lock<mutex> lp(lock_pause);
+
 
     menu= new std::thread(&ScreenCapture::genMenu,this);
 
@@ -541,7 +544,7 @@ int ScreenCapture::start() {
 
 int ScreenCapture::startVideoRecording() {
     //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
-
+    unique_lock<mutex> lp(lock_pause);
     int frameFinished;//  when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
 
 
@@ -589,6 +592,7 @@ int ScreenCapture::startVideoRecording() {
     {
        // if( ii++ == no_frames )break;
         if(running== false) break;
+        cv_v.wait(lp,[this](){return !pause;});
         if(pAVPacket->stream_index == VideoStreamIndx)
         {
 
@@ -668,6 +672,7 @@ int ScreenCapture::startVideoRecording() {
 }
 
 int ScreenCapture::startAudioRecording() {
+    unique_lock<mutex> lp(lock_pause_audio);
     int ret;
     AVPacket* inPacket, * outPacket;
     AVFrame* rawFrame, * scaledFrame;
@@ -725,8 +730,10 @@ int ScreenCapture::startAudioRecording() {
     int ii=0;
 
     while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
+
         //if( ii++ == 2400  )break;
         if(running== false) break;
+        cv_a.wait(lp,[this](){return !pause;});
         //decode audio routing
 
 
