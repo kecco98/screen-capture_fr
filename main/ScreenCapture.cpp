@@ -496,8 +496,8 @@ int ScreenCapture::menu() {
 int ScreenCapture::startRecording() {
 
     menu= new std::thread(&ScreenCapture::menu,this);
-
-    cv_s.wait(lock_running,[this]{return running;});
+    unique_lock<mutex> ul(lock_running);
+    cv_s.wait(ul,[this](){return running;});
 
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
