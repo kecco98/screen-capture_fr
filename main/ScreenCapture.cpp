@@ -487,15 +487,15 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 
 
-int ScreenCapture::menu() {
+int ScreenCapture::genMenu() {
 
 
     return 0;
 }
 
-int ScreenCapture::startRecording() {
+int ScreenCapture::start() {
 
-    menu= new std::thread(&ScreenCapture::menu,this);
+    menu= new std::thread(&ScreenCapture::genMenu,this);
     unique_lock<mutex> ul(lock_running);
     cv_s.wait(ul,[this](){return running;});
 
