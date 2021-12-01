@@ -15,7 +15,7 @@ ScreenCapture::ScreenCapture(){
 
 ScreenCapture::~ScreenCapture(){
 
-//menu
+
 
     if (av_write_trailer(outAVFormatContext) < 0) {
         cerr << "Error in writing av trailer" << endl;
@@ -485,6 +485,14 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
     }*/
 
+
+
+int ScreenCapture::menu() {
+
+
+    return 0;
+}
+
 int ScreenCapture::startRecording() {
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
@@ -822,11 +830,7 @@ int ScreenCapture::initConvertedSamples(uint8_t*** converted_input_samples, AVCo
     return 0;
 }
 
-int ScreenCapture::menu() {
 
-
-    return 0;
-}
 
 /*
 void ScreenCapture::captureScreen(int no_frames )
