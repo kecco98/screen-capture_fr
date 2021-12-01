@@ -497,11 +497,12 @@ int ScreenCapture::genMenu() {
 }
 
 int ScreenCapture::start() {
-    unique_lock<mutex> ul(lock_running);
+    unique_lock<mutex> lr(lock_running);
+    unique_lock<mutex> lp(lock_pause);
 
     menu= new std::thread(&ScreenCapture::genMenu,this);
 
-    cv_s.wait(ul,[this](){return running;});
+    cv_s.wait(lr,[this](){return running;});
 
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
@@ -563,7 +564,8 @@ int ScreenCapture::startVideoRecording() {
     int ret;
     while( av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
     {
-        if( ii++ == no_frames )break;
+       // if( ii++ == no_frames )break;
+        if(running== false) break;
         if(pAVPacket->stream_index == VideoStreamIndx)
         {
 
@@ -700,7 +702,8 @@ int ScreenCapture::startAudioRecording() {
     int ii=0;
 
     while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
-        if( ii++ == 2400  )break;
+        //if( ii++ == 2400  )break;
+        if(running== false) break;
         //decode audio routing
 
 
