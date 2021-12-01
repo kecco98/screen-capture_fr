@@ -15,8 +15,6 @@ ScreenCapture::ScreenCapture() : running(false), pause(false){
 
 ScreenCapture::~ScreenCapture(){
 
-
-
     if (av_write_trailer(outAVFormatContext) < 0) {
         cerr << "Error in writing av trailer" << endl;
         exit(-1);
@@ -488,11 +486,36 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
 
 int ScreenCapture::genMenu() {
+    char s;
+    char p;
+    char r;
 
-    int a;
-    cin>>a;
+    cout<<"Write s if you want to start!"<<endl;
+    cin>>s;
     running=true;
     cv_s.notify_all();
+    cout<<"Recording is runnig!"<<endl;
+    cout<<"- write p to pause the recording"<<endl;
+    cout<<"- write t to terminate the recording"<<endl;
+    while(running){
+        cin>>p;
+        if(p=='p'){
+            //pausa
+            pause=true;
+            cout<<"Recording in pause!"<<endl;
+            cout<<"- write r to restart the recording"<<endl;
+            while(pause){
+                cin>>r;
+                if(r=='r'){
+                    pause=false;
+                }
+            }
+        } else if(p=='t'){
+            running=false;
+            cout<<"Recording terminated"<<endl;
+        }
+    }
+
     return 0;
 }
 
