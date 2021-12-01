@@ -87,10 +87,16 @@ private:
     int outAudioStreamIndex = -1;
     int codec_id;
     int64_t pts = 0;
-    std::mutex lock_sf;
-    std::mutex fin;
+//threads
     std::thread *videoStream;
     std::thread *audioStream;
+//mutex
+    std::mutex lock_sf;
+    std::mutex lock_running;
+    std::mutex lock_pause;
+//variabili di controllo esecuzione
+    bool running;
+    bool pause;
 
 public:
 
