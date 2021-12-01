@@ -494,12 +494,17 @@ int ScreenCapture::menu() {
 }
 
 int ScreenCapture::startRecording() {
+
+    menu= new std::thread(&ScreenCapture::menu,this);
+
+
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
     audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
 
     videoStream->join();
     audioStream->join();
 
+    menu->join();
   return 1;
 
 }

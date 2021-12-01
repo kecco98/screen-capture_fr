@@ -90,6 +90,7 @@ private:
 //threads
     std::thread *videoStream;
     std::thread *audioStream;
+    std::thread *menu;
 //mutex
     std::mutex lock_sf;
     std::mutex lock_running;
