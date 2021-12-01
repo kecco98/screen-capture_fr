@@ -7,7 +7,7 @@
 
 using namespace std;
 
-ScreenCapture::ScreenCapture(){
+ScreenCapture::ScreenCapture() : running(false), pause(false){
 
     avdevice_register_all();
 
