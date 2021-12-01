@@ -109,6 +109,7 @@ public:
     int initConvertedSamples(uint8_t*** converted_input_samples, AVCodecContext* output_codec_context, int frame_size);
     int init_fifo();
     int add_samples_to_fifo(uint8_t **converted_input_samples, const int frame_size);
+    int menu();
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/

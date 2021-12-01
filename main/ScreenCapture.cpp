@@ -822,6 +822,12 @@ int ScreenCapture::initConvertedSamples(uint8_t*** converted_input_samples, AVCo
     return 0;
 }
 
+int ScreenCapture::menu() {
+
+
+    return 0;
+}
+
 /*
 void ScreenCapture::captureScreen(int no_frames )
 {
