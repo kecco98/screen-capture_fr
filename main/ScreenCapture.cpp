@@ -15,7 +15,7 @@ ScreenCapture::ScreenCapture(){
 
 ScreenCapture::~ScreenCapture(){
 
-
+//menu
 
     if (av_write_trailer(outAVFormatContext) < 0) {
         cerr << "Error in writing av trailer" << endl;
