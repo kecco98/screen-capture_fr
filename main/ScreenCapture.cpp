@@ -100,10 +100,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
 
     av_dict_set( &options, "preset", "superfast", 0 );
 
-    if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
-        cout<<"Error in opening the input device!";
-        exit(1);
-    }
 
 
     if (av_dict_set(&options, "probesize", "60M", 0) < 0) {
@@ -115,6 +111,11 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
           cout<<"\nerror in setting dictionary value";
           exit(4);
       }*/
+
+    if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
+        cout<<"Error in opening the input device!";
+        exit(1);
+    }
 
 
     if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) //da fare forse per il pausa e riprendi
@@ -202,11 +203,13 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     if(deviceName == "") deviceName = "default"; */
    // pAudioInputFormat =av_find_input_format("pulseaudio");
 
+
     if (avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions) != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
 //#endif
+
 
 /*#if defined _WIN32
     audioInputFormat = av_find_input_format("dshow");
@@ -216,6 +219,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(-1);
     }
 #endif*/
+
 
     if (avformat_find_stream_info(pAudioFormatContext, nullptr) != 0) {
         cerr << "Error: cannot find the audio stream information" << endl;
@@ -232,6 +236,8 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cerr << "Error: unable to find audio stream index" << endl;
         exit(-2);
     }
+
+
 
     video_st = avformat_new_stream(outAVFormatContext ,NULL);
     if( !video_st )
@@ -322,6 +328,9 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     avcodec_parameters_from_context(outAVFormatContext->streams[VideoStreamIndx]->codecpar, outAVCodecContext);
 
     AVCodecParameters* params = pAudioFormatContext->streams[audioStreamIndx]->codecpar;
+
+
+
     pAudioCodec = avcodec_find_decoder(params->codec_id);
     if (pAudioCodec == nullptr) {
         cerr << "Error: cannot find the audio decoder" << endl;
@@ -397,7 +406,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(1);
     }
 
-    avcodec_parameters_from_context(outAVFormatContext->streams[outAudioStreamIndex]->codecpar, outAudioCodecContext);
+   avcodec_parameters_from_context(outAVFormatContext->streams[outAudioStreamIndex]->codecpar, outAudioCodecContext);
 
     //da qui unificare
     /* create empty video file */
@@ -453,7 +462,7 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cout<<"\nunable to release the avframe resources for outframe";
         exit(1);
     }
-
+    avformat_close_input(&pAudioFormatContext);
     return 10;
 }
 /*void ScreenCapture::captureScreen(int no_frames )
@@ -678,6 +687,7 @@ int ScreenCapture::startAudioRecording() {
     AVFrame* rawFrame, * scaledFrame;
     uint8_t** resampledData;
 
+   // avcodec_parameters_from_context(outAVFormatContext->streams[outAudioStreamIndex]->codecpar, outAudioCodecContext);
     init_fifo();
 
     //allocate space for a packet
@@ -729,14 +739,25 @@ int ScreenCapture::startAudioRecording() {
     }
     int ii=0;
 
-    while (av_read_frame(pAudioFormatContext, inPacket) >= 0 /*&& inPacket->stream_index == audioStreamIndx*/) {
+    avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions);
+
+    while ( running /*av_read_frame(pAudioFormatContext, inPacket) >= 0 *//*&& inPacket->stream_index == audioStreamIndx*/) {
 
         //if( ii++ == 2400  )break;
-        if(running== false) break;
-        cv_a.wait(lp,[this](){return !pause;});
-        //decode audio routing
+        // if (running == false) break;
 
 
+        if (pause) {
+           // avcodec_flush_buffers(m_codec_ctx.get());
+            avformat_close_input(&pAudioFormatContext);
+        cv_a.wait(lp, [this]() { return !pause; });
+       avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions);
+
+    }
+        if( av_read_frame(pAudioFormatContext, inPacket) <0) break;
+
+         // }
+//decode audio routing
         av_packet_rescale_ts(outPacket, pAudioFormatContext->streams[audioStreamIndx]->time_base, pAudioCodecContext->time_base);
 
         if ((ret = avcodec_send_packet(pAudioCodecContext, inPacket)) < 0) {
