@@ -1253,6 +1253,31 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi) {
     openInputVideo();
     openInputAudio();
 
+    if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
+    {
+        cout<<output<<"  file ouy\n ";
+        if( avio_open2(&outAVFormatContext->pb , output , AVIO_FLAG_WRITE ,NULL, NULL) < 0 )
+        {
+            cout<<"\nerror in creating the video file";
+            exit(1);
+        }
+    }
+
+    if(!outAVFormatContext->nb_streams)
+    {
+        cout<<"\noutput file dose not contain any stream";
+        exit(1);
+    }
+
+    /* imp: mp4 container or some advanced container file required header information*/
+    if(avformat_write_header(outAVFormatContext , &options) < 0)
+    {
+        cout<<"\nerror in writing the header context";
+        exit(1);
+    }
+
+    cout<<"\n\nOutput file information :\n\n";
+    av_dump_format(outAVFormatContext , 0 ,output ,1);
 
     return 0;
 }
