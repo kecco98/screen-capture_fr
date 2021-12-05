@@ -1048,8 +1048,6 @@ int ScreenCapture::openInput(int width, int height) {
     return 0;
 }
 
-
-
 /*
 void ScreenCapture::captureScreen(int no_frames )
 {
