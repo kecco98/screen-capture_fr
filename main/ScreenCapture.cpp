@@ -1247,8 +1247,14 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     openInputVideo();
     openInputAudio();
 
+    streamTrail();
 
 
+
+    return 0;
+}
+
+int ScreenCapture::streamTrail(){
 
     /* imp: mp4 container or some advanced container file required header information*/
     if(avformat_write_header(outAVFormatContext , &options) < 0)
@@ -1259,8 +1265,6 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
 
     cout<<"\n\nOutput file information :\n\n";
     av_dump_format(outAVFormatContext , 0 ,output ,1);
-
-    return 0;
 }
 
 /*

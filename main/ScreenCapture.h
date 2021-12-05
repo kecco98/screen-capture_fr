@@ -126,6 +126,7 @@ public:
     int openInputVideo();
     int openInputAudio();
     int openInput(int widthi, int heighti,const char* outputi,bool audioi);
+    int streamTrail();
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/
