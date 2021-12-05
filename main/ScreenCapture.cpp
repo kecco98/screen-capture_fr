@@ -528,7 +528,10 @@ int ScreenCapture::start() {
 
 int ScreenCapture::startVideoRecording() {
     //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
+
     unique_lock<mutex> lp(lock_pause);
+    openInputVideo();
+
     int frameFinished;//  when you decode a single packet, you still don't have information enough to have a frame [depending on the type of codec, some of them //you do], when you decode a GROUP of packets that represents a frame, then you have a picture! that's why frameFinished will let //you know you decoded enough to have a frame.
     pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
     av_init_packet(pAVPacket);
@@ -681,6 +684,7 @@ int ScreenCapture::startVideoRecording() {
 
 int ScreenCapture::startAudioRecording() {
     unique_lock<mutex> lp(lock_pause_audio);
+    openInputAudio();
     int ret;
     AVPacket* inPacket, * outPacket;
     AVFrame* rawFrame, * scaledFrame;
@@ -1083,7 +1087,15 @@ int ScreenCapture::openInputVideo() {
         cout<<"\noutput file dose not contain any stream";
         exit(1);
     }
+    /* imp: mp4 container or some advanced container file required header information*/
+    if(avformat_write_header(outAVFormatContext , &options) < 0)
+    {
+        cout<<"\nerror in writing the header context";
+        exit(1);
+    }
 
+    cout<<"\n\nOutput file information :\n\n";
+    av_dump_format(outAVFormatContext , 0 ,output ,1);
 
 
 
@@ -1244,11 +1256,10 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi) {
     conc = co.c_str();
 
     output=outputi;
-    openInputVideo();
-    openInputAudio();
 
 
-    /* imp: mp4 container or some advanced container file required header information*/
+
+/*    *//* imp: mp4 container or some advanced container file required header information*//*
     if(avformat_write_header(outAVFormatContext , &options) < 0)
     {
         cout<<"\nerror in writing the header context";
@@ -1256,7 +1267,7 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi) {
     }
 
     cout<<"\n\nOutput file information :\n\n";
-    av_dump_format(outAVFormatContext , 0 ,output ,1);
+    av_dump_format(outAVFormatContext , 0 ,output ,1);*/
 
     return 0;
 }
