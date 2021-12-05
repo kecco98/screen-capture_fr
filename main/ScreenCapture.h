@@ -99,16 +99,19 @@ private:
     std::thread *menu;
 //mutex
     std::mutex lock_sf;
+    std::mutex lock_init;
     std::mutex lock_running;
     std::mutex lock_pause;
     std::mutex lock_pause_audio;
 //variabili di controllo esecuzione
     bool running;
     bool pause;
+    bool initVideo;
 //condition variables
     std::condition_variable cv_s;
     std::condition_variable cv_v;
     std::condition_variable cv_a;
+    std::condition_variable cv_t;
 
 
 public:

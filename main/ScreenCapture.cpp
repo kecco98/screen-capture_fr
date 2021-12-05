@@ -1086,6 +1086,9 @@ int ScreenCapture::openInputVideo() {
 
     if(audio==false){
         streamTrail();
+    } else {
+        cv_t.notify_all();
+        initVideo=true;
     }
 
 
@@ -1093,6 +1096,9 @@ int ScreenCapture::openInputVideo() {
 }
 
 int ScreenCapture::openInputAudio() {
+    unique_lock<mutex> ul(lock_init);
+    cv_t.wait(ul, [this](){return initVideo;});
+
     audioOptions=nullptr;
 
     pAudioFormatContext = nullptr;
@@ -1232,6 +1238,7 @@ int ScreenCapture::openInputAudio() {
 
     avcodec_parameters_from_context(outAVFormatContext->streams[outAudioStreamIndex]->codecpar, outAudioCodecContext);
 
+    streamTrail();
 
     return 0;
 }
