@@ -1084,7 +1084,9 @@ int ScreenCapture::openInputVideo() {
         exit(1);
     }
 
-
+    if(audio==false){
+        streamTrail();
+    }
 
 
     return 0;
