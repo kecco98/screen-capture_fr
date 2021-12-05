@@ -81,11 +81,14 @@ private:
     AVCodec *outAudioCodec;
     AVCodecContext *outAudioCodecContext;
     AVAudioFifo * fifo;
+    AVPacket* inPacket, * outPacket;
+    AVFrame* rawFrame, * scaledFrame;
 
     int VideoStreamIndx=-1;
     int audioStreamIndx=-1;
     int outAudioStreamIndex = -1;
     int codec_id;
+    const char* conc;
     int64_t pts = 0;
 //threads
     std::thread *videoStream;
@@ -117,12 +120,12 @@ public:
     int init_fifo();
     int add_samples_to_fifo(uint8_t **converted_input_samples, const int frame_size);
     int genMenu();
+    int openInputVideo();
+    int openInputAudio();
+    int openInput(int width, int height);
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/
-
-
-
 
 
 };

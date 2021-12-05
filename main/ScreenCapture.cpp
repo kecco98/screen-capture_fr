@@ -68,7 +68,6 @@ ScreenCapture::~ScreenCapture(){
     //avcodec_free_context(&outAVCodecContext);gia fatta
 }
 
-
 int ScreenCapture::setup(const char* output_file, int width, int height, const char* conc)
 {
     pAVFormatContext = NULL;
@@ -117,7 +116,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(1);
     }
 
-
     if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) //da fare forse per il pausa e riprendi
     {
         cout<<"\nunable to find the stream information";
@@ -154,6 +152,8 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         exit(1);
     }
 
+    /*-- FINE OPEN VIDEO DEVICE --*/
+
     //Initialize the AVCodecContext to use the given AVCodec. ,copia info codec in ctx
     if( avcodec_open2(pAVCodecContext , pAVCodec , NULL) < 0 )
     {
@@ -176,6 +176,8 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
         cout<<"\nerror in guessing the video format. try with correct format";
         exit(1);
     }
+
+    /*-- INIZIA OPEN AUDIO DEVICE--*/
 
     audioOptions=nullptr;
 
@@ -465,34 +467,6 @@ int ScreenCapture::setup(const char* output_file, int width, int height, const c
     avformat_close_input(&pAudioFormatContext);
     return 10;
 }
-/*void ScreenCapture::captureScreen(int no_frames )
-{
-    int ii = 0;
-    int ret;
-
-    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
-    {
-        if( ii++ == no_frames )break;
-        if(pAVPacket->stream_index == VideoStreamIndx) {
-            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
-            if (ret >= 0) {
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
-
-                    exit(-2);
-                else if (ret < 0) {
-                    fprintf(stderr, "Error during decoding\n");
-                    exit( -1);
-                }
-            }
-        }
-    }
-
-
-
-
-    }*/
-
-
 
 int ScreenCapture::genMenu() {
     char s;
@@ -517,8 +491,8 @@ int ScreenCapture::genMenu() {
                 cin>>r;
                 if(r=='r'){
                     pause=false;
-                    cv_a.notify_all();
                     cv_v.notify_all();
+                    cv_a.notify_all();
                     cout<<"Restart recording!"<<endl;
 
                 }
@@ -895,6 +869,185 @@ int ScreenCapture::initConvertedSamples(uint8_t*** converted_input_samples, AVCo
     return 0;
 }
 
+int ScreenCapture::openInputVideo() {
+    pAVFormatContext = NULL;
+    options = NULL;
+
+    //Context allocation
+    pAVFormatContext = avformat_alloc_context();
+    //Set screen as input device
+    pAVInputFormat = av_find_input_format("x11grab");
+
+    if(av_dict_set( &options,"framerate","30",0 ) < 0)
+    {
+        cout<<"\nerror in setting dictionary value";
+        exit(2);
+    }
+
+    if(av_dict_set( &options,"video_size",conc,0 ) < 0)
+    {
+        cout<<"\nerror in setting video size";
+        exit(3);
+    }
+
+    av_dict_set( &options, "preset", "superfast", 0 );
+
+    if (av_dict_set(&options, "probesize", "60M", 0) < 0) {
+        cerr << "Error in setting probesize value" << endl;
+        exit(-1);
+    }
+
+    if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
+        cout<<"Error in opening the input device!";
+        exit(1);
+    }
+
+    if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) //da fare forse per il pausa e riprendi
+    {
+        cout<<"\nunable to find the stream information";
+        exit(1);
+    }
+
+    VideoStreamIndx = -1;
+
+    /* find the first video stream index . Also there is an API available to do the below operations */
+    for(int i = 0; i < pAVFormatContext->nb_streams; i++ ) // find video stream posistion/index.
+    {
+        if( pAVFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO )
+        {
+            VideoStreamIndx = i;
+            break;
+        }
+
+    }
+
+    if( VideoStreamIndx == -1)
+    {
+        cout<<"\nunable to find the video stream index. (-1)";
+        exit(1);
+    }
+    // Saving video codec
+    pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
+
+    pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);//trova il codec
+    if( pAVCodec == NULL )
+    {
+        cout<<"\nunable to find the decoder";
+        exit(1);
+    }
+    return 0;
+}
+
+int ScreenCapture::openInputAudio() {
+    audioOptions=nullptr;
+
+    pAudioFormatContext = nullptr;
+
+    pAudioFormatContext = avformat_alloc_context();
+    if(pAudioFormatContext==nullptr){
+        cerr << "Error: paudiocontext" << endl;
+    }
+    if ( av_dict_set(&audioOptions, "sample_rate", "44100", 0) < 0) {
+        cerr << "Error: cannot set audio sample rate" << endl;
+        exit(-1);
+    }
+
+    if (av_dict_set(&audioOptions, "async", "1", 0) < 0) {
+        cerr << "Error: cannot set audio sample rate" << endl;
+        exit(-1);
+    }
+    //av_dict_set(&audioOptions, "audio_device_number", "0", 0);
+    //av_dict_set(&audioOptions, "thread_queue_size", "4096", 0);
+
+//#if defined linux
+    pAudioInputFormat = av_find_input_format("alsa");
+    /*string deviceName;
+    if(deviceName == "") deviceName = "default"; */
+    // pAudioInputFormat =av_find_input_format("pulseaudio");
+
+
+    if (avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions) != 0) {
+        cerr << "Error in opening input device (audio)" << endl;
+        exit(-1);
+    }
+//#endif
+
+
+/*#if defined _WIN32
+    audioInputFormat = av_find_input_format("dshow");
+    value = avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
+    if (value != 0) {
+        cerr << "Error in opening input device (audio)" << endl;
+        exit(-1);
+    }
+#endif*/
+
+
+    if (avformat_find_stream_info(pAudioFormatContext, nullptr) != 0) {
+        cerr << "Error: cannot find the audio stream information" << endl;
+        exit(-1);
+    }
+
+    for (int i = 0; i < pAudioFormatContext->nb_streams; i++) {
+        if (pAudioFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            audioStreamIndx = i;
+            break;
+        }
+    }
+    if (audioStreamIndx == -1) {
+        cerr << "Error: unable to find audio stream index" << endl;
+        exit(-2);
+    }
+
+    AVCodecParameters* params = pAudioFormatContext->streams[audioStreamIndx]->codecpar;
+
+    pAudioCodec = avcodec_find_decoder(params->codec_id);
+    if (pAudioCodec == nullptr) {
+        cerr << "Error: cannot find the audio decoder" << endl;
+        exit(-1);
+    }
+
+    pAudioCodecContext = avcodec_alloc_context3(pAudioCodec);
+    if (avcodec_parameters_to_context(pAudioCodecContext, params) < 0) {
+        cout << "Cannot create codec context for audio input" << endl;
+    }
+
+    if (avcodec_open2(pAudioCodecContext, pAudioCodec, nullptr) < 0) {
+        cerr << "Error: cannot open the input audio codec" << endl;
+        exit(-1);
+    }
+
+    //Generate audio stream
+    outAudioCodecContext = nullptr;
+    outAudioCodec = nullptr;
+    int i;
+
+    AVStream* audio_st = avformat_new_stream(outAVFormatContext, nullptr);
+    if (audio_st == nullptr) {
+        cerr << "Error: cannot create audio stream" << endl;
+        exit(1);
+    }
+
+    return 0;
+}
+
+int ScreenCapture::openInput(int width, int height) {
+
+    string in2, co, x, y;
+
+    cout<<"Insert the width of the window you want to record!"<<endl;
+    cin >> width;
+    cout<<"Insert the height of the window you want to record!"<<endl;
+    cin >> height;
+    co = to_string(width) + "x" + to_string(height);
+    conc = co.c_str();
+    cout<< conc;
+
+    openInputVideo();
+    openInputAudio();
+    return 0;
+}
+
 
 
 /*
@@ -995,3 +1148,29 @@ void ScreenCapture::encodeVideo(int no_frames)
 
 }*/
 
+/*void ScreenCapture::captureScreen(int no_frames )
+{
+    int ii = 0;
+    int ret;
+
+    while (av_read_frame( pAVFormatContext , pAVPacket ) >= 0 )
+    {
+        if( ii++ == no_frames )break;
+        if(pAVPacket->stream_index == VideoStreamIndx) {
+            ret = avcodec_send_packet(pAVCodecContext, pAVPacket);
+            if (ret >= 0) {
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) //gestire errori
+
+                    exit(-2);
+                else if (ret < 0) {
+                    fprintf(stderr, "Error during decoding\n");
+                    exit( -1);
+                }
+            }
+        }
+    }
+
+
+
+
+    }*/
