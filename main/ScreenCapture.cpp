@@ -1249,7 +1249,7 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     openInputVideo();
     openInputAudio();
 
-    streamTrail();
+    //streamTrail();
 
 
 
