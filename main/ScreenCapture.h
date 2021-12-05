@@ -93,6 +93,7 @@ private:
     const char* output;
     const char* conc;
     int64_t pts = 0;
+
 //threads
     std::thread *videoStream;
     std::thread *audioStream;
