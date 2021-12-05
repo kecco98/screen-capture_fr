@@ -88,6 +88,8 @@ private:
     int audioStreamIndx=-1;
     int outAudioStreamIndex = -1;
     int codec_id;
+    int width, height;
+    const char* output;
     const char* conc;
     int64_t pts = 0;
 //threads
