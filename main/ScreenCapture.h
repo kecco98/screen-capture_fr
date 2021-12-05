@@ -124,7 +124,7 @@ public:
     int genMenu();
     int openInputVideo();
     int openInputAudio();
-    int openInput(int width, int height);
+    int openInput(int widthi, int heighti,const char* outputi);
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/
