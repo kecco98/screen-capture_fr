@@ -31,7 +31,7 @@ int main()
     conc = co.c_str();
     cout<< conc;
 
-    video_record.openInput(width, height,output);
+    video_record.openInput(width, height,output,true);
     video_record.start();
 
     cout<<"\nProgram executed successfully"<<endl;

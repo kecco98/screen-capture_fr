@@ -89,6 +89,7 @@ private:
     int outAudioStreamIndex = -1;
     int codec_id;
     int width, height;
+    bool audio;
     const char* output;
     const char* conc;
     int64_t pts = 0;
@@ -124,7 +125,7 @@ public:
     int genMenu();
     int openInputVideo();
     int openInputAudio();
-    int openInput(int widthi, int heighti,const char* outputi);
+    int openInput(int widthi, int heighti,const char* outputi,bool audioi);
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);
     void encodeVideo(int no_frames);*/
