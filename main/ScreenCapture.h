@@ -52,7 +52,13 @@ extern "C"
 
 #include "libswscale/swscale.h"
 
+#ifdef _WIN32
+
+#elif defined linux
+
 #include <X11/Xlib.h>
+
+#endif
 
 }
 

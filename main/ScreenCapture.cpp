@@ -43,7 +43,7 @@ ScreenCapture::~ScreenCapture(){
         cout<<"\nunable to free avformat context";
         exit(1);
     }*/
-
+/*
     avformat_close_input(&pAudioFormatContext);
     if(pAVFormatContext == nullptr){
         cout<<"Flie close succesfully"<<endl;
@@ -60,11 +60,11 @@ ScreenCapture::~ScreenCapture(){
     } else {
         cerr<<"Error: unable to close the file";
         exit(-1);
-    }
+    }*/
    // avcodec_free_context(&pAVCodecContext); gia fatta
 
     avformat_close_input(&outAVFormatContext);
-    avcodec_free_context(&outAudioCodecContext);
+    //avcodec_free_context(&outAudioCodecContext);
     //avcodec_free_context(&outAVCodecContext);gia fatta
 }
 
@@ -517,10 +517,10 @@ int ScreenCapture::start() {
 
 
     videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
-    audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
+    //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
 
     videoStream->join();
-    audioStream->join();
+    //audioStream->join();
 
     menu->join();
   return 1;
@@ -906,7 +906,15 @@ int ScreenCapture::openInputVideo() {
     //Context allocation
     pAVFormatContext = avformat_alloc_context();
     //Set screen as input device
-    pAVInputFormat = av_find_input_format("x11grab");
+
+#ifdef _WIN32
+    pAVInputFormat = av_find_input_format("gdigrab");
+    if (avformat_open_input(&pAVFormatContext, "desktop", pAVInputFormat, &options) != 0) {
+        cerr << "Couldn't open input stream" << endl;
+        exit(-1);
+    }
+
+#elif defined linux
 
     if(av_dict_set( &options,"framerate","30",0 ) < 0)
     {
@@ -927,10 +935,32 @@ int ScreenCapture::openInputVideo() {
         exit(-1);
     }
 
+    pAVInputFormat = av_find_input_format("x11grab");
+
     if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
         cout<<"Error in opening the input device!";
         exit(1);
     }
+#else
+
+    if (av_dict_set(&options, "pixel_format", "0rgb", 0) < 0) {
+        cerr << "Error in setting pixel format" << endl;
+        exit(-1);
+    }
+
+    if (av_dict_set(&options, "video_device_index", "1", 0) < 0) {
+        cerr << "Error in setting video device index" << endl;
+        exit(-1);
+    }
+
+    pAVInputFormat = av_find_input_format("avfoundation");
+
+    if (avformat_open_input(&pAVFormatContext, "0:none", pAVInputFormat, &options) != 0) {
+        cerr << "Error in opening input device" << endl;
+        exit(-1);
+    }
+
+#endif
 
     if(avformat_find_stream_info(pAVFormatContext,NULL) < 0) //da fare forse per il pausa e riprendi
     {
@@ -1076,7 +1106,7 @@ int ScreenCapture::openInputVideo() {
     avcodec_parameters_from_context(outAVFormatContext->streams[VideoStreamIndx]->codecpar, outAVCodecContext);
     if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
     {
-        cout<<output<<"  file ouy\n ";
+        cout<<output<<"  file out\n ";
         if( avio_open2(&outAVFormatContext->pb , output , AVIO_FLAG_WRITE ,NULL, NULL) < 0 )
         {
             cout<<"\nerror in creating the video file";
@@ -1090,20 +1120,15 @@ int ScreenCapture::openInputVideo() {
         exit(1);
     }
 
-    if(audio==false){
-        streamTrail();
-    } else {
-        cv_t.notify_all();
-        initVideo=true;
-    }
+    streamTrail();
 
 
     return 0;
 }
 
 int ScreenCapture::openInputAudio() {
-    unique_lock<mutex> ul(lock_init);
-    cv_t.wait(ul, [this](){return initVideo;});
+    //unique_lock<mutex> ul(lock_init);
+   // cv_t.wait(ul, [this](){return initVideo;});
 
     audioOptions=nullptr;
 
@@ -1125,7 +1150,7 @@ int ScreenCapture::openInputAudio() {
     //av_dict_set(&audioOptions, "audio_device_number", "0", 0);
     //av_dict_set(&audioOptions, "thread_queue_size", "4096", 0);
 
-//#if defined linux
+#if defined linux
     pAudioInputFormat = av_find_input_format("alsa");
     /*string deviceName;
     if(deviceName == "") deviceName = "default"; */
@@ -1136,16 +1161,16 @@ int ScreenCapture::openInputAudio() {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
-//#endif
+#endif
 
-/*#if defined _WIN32
+#if defined _WIN32
     audioInputFormat = av_find_input_format("dshow");
     value = avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
     if (value != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
-#endif*/
+#endif
 
     if (avformat_find_stream_info(pAudioFormatContext, nullptr) != 0) {
         cerr << "Error: cannot find the audio stream information" << endl;
@@ -1261,7 +1286,7 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     output=outputi;
 
     openInputVideo();
-    openInputAudio();
+   // openInputAudio();
     //streamTrail();
 
 
