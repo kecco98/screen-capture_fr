@@ -45,7 +45,7 @@ ScreenCapture::~ScreenCapture(){
     }*/
 
     avformat_close_input(&pAudioFormatContext);
-    if(pAVFormatContext == nullptr){
+    if(pAudioFormatContext == nullptr){
         cout<<"Flie close succesfully"<<endl;
     } else {
         cerr<<"Error: unable to close the file";
@@ -287,8 +287,6 @@ int ScreenCapture::startAudioRecording() {
     unique_lock<mutex> lp(lock_pause_audio);
    // openInputAudio();
     int ret;
-    AVPacket* inPacket, * outPacket;
-    AVFrame* rawFrame, * scaledFrame;
     uint8_t** resampledData;
 
    // avcodec_parameters_from_context(outAVFormatContext->streams[outAudioStreamIndex]->codecpar, outAudioCodecContext);
@@ -341,9 +339,8 @@ int ScreenCapture::startAudioRecording() {
         swr_free(&resampleContext);
         exit(1);
     }
+
     int ii=0;
-
-
     while ( running /*av_read_frame(pAudioFormatContext, inPacket) >= 0 *//*&& inPacket->stream_index == audioStreamIndx*/) {
 
         //if( ii++ == 2400  )break;
@@ -351,27 +348,43 @@ int ScreenCapture::startAudioRecording() {
 
 
         if (pause) {
-           // avcodec_flush_buffers(m_codec_ctx.get());
-            avformat_close_input(&pAudioFormatContext);
-        cv_a.wait(lp, [this]() { return !pause; });
+               // avcodec_flush_buffers(m_codec_ctx.get());
+               avformat_close_input(&pAudioFormatContext);
+            cv_a.wait(lp, [this]() { return !pause; });
+            #if defined linux
+                        avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions);
+            #endif
+
+            #if defined _WIN32
+
+                        avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
+
+            #else
+                /*if (av_dict_set(&audioOptions, "audio_device_index", "0", 0) < 0) {
+                    cerr << "Error: cannot set audio device number" << endl;
+                    exit(-1);
+                }*/
+
+                pAudioInputFormat = av_find_input_format("avfoundation");
+
+                //ffmpeg -f avfoundation -i ":0" output.mp4
+
+                avformat_open_input(&pAudioFormatContext, ":0", pAudioInputFormat, &audioOptions);
+            #endif
+        }
+
+
+        if( av_read_frame(pAudioFormatContext, inPacket) <0 || inPacket->stream_index != audioStreamIndx) {
         #if defined linux
-                    avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions);
-        #endif
-
-        #if defined _WIN32
-
-                    avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
-
+            break;
         #else
-                    if (av_dict_set(&audioOptions, "audio_device_index", "0", 0) < 0) {
-                        cerr << "Error: cannot set audio device number" << endl;
-                        exit(-1);
-                    }
-                    avformat_open_input(&pAudioFormatContext, "", pAudioInputFormat, &audioOptions);
+            if (running) {
+                continue;
+            } else {
+                break;
+            }
         #endif
-
-    }
-        if( av_read_frame(pAudioFormatContext, inPacket) <0) break;
+        }
 
          // }
 //decode audio routing
@@ -568,7 +581,7 @@ int ScreenCapture::openInputVideo() {
 
     pAVInputFormat = av_find_input_format("avfoundation");
 
-    if (avformat_open_input(&pAVFormatContext, "0:none", pAVInputFormat, &options) != 0) {
+    if (avformat_open_input(&pAVFormatContext, "", pAVInputFormat, &options) != 0) {
         cerr << "Error in opening input device" << endl;
         exit(-1);
     }
@@ -783,14 +796,19 @@ int ScreenCapture::openInputAudio() {
     }
 #else
 
-    if (av_dict_set(&audioOptions, "audio_device_index", "0", 0) < 0) {
+    /*if(av_dict_set(&options,"list_devices","true",0) < 0) {
+        cerr << "Error: cannot set list_devices" << endl;
+        exit(-1);
+    }*/
+
+    /*if (av_dict_set(&audioOptions, "audio_device_index", "0", 0) < 0) {
         cerr << "Error: cannot set audio device number" << endl;
         exit(-1);
-    }
+    }*/
 
     pAudioInputFormat = av_find_input_format("avfoundation");
 
-    if (avformat_open_input(&pAudioFormatContext, "", pAudioInputFormat, &audioOptions) != 0) {
+    if (avformat_open_input(&pAudioFormatContext, ":0", pAudioInputFormat, &audioOptions) != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
@@ -813,7 +831,7 @@ int ScreenCapture::openInputAudio() {
         exit(-2);
     }
 
-  //  avcodec_parameters_from_context(outAVFormatContext->streams[VideoStreamIndx]->codecpar, outAVCodecContext);
+    //avcodec_parameters_from_context(outAVFormatContext->streams[VideoStreamIndx]->codecpar, outAVCodecContext);
 
     AVCodecParameters* params = pAudioFormatContext->streams[audioStreamIndx]->codecpar;
 
