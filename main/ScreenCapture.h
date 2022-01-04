@@ -98,6 +98,10 @@ private:
     bool audio;
     const char* output;
     const char* conc;
+    const char* sta;
+    const char* linSta;
+    const char* winSta;
+    std::string x, y;
     int64_t pts = 0;
 
 //threads
@@ -135,7 +139,7 @@ public:
     int genMenu();
     int openInputVideo();
     int openInputAudio();
-    int openInput(int widthi, int heighti,const char* outputi,bool audioi);
+    int openInput(int widthi, int heighti,const char* outputi,bool audioi, std::string xi, std::string yi);
     int streamTrail();
     /*void captureScreen(int no_frames, uint8_t *video_outbuf);
     void scaleVideo(int no_frames , uint8_t *video_outbuf);

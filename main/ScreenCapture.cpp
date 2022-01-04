@@ -554,7 +554,8 @@ int ScreenCapture::openInputVideo() {
 
 #ifdef _WIN32
     pAVInputFormat = av_find_input_format("gdigrab");
-    if (avformat_open_input(&pAVFormatContext, "desktop", pAVInputFormat, &options) != 0) {
+
+    if (avformat_open_input(&pAVFormatContext, winSta, pAVInputFormat, &options) != 0) {
         cerr << "Couldn't open input stream" << endl;
         exit(-1);
     }
@@ -563,7 +564,7 @@ int ScreenCapture::openInputVideo() {
 
     pAVInputFormat = av_find_input_format("x11grab");
 
-    if(avformat_open_input(&pAVFormatContext, ":0.0", pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
+    if(avformat_open_input(&pAVFormatContext, linSta, pAVInputFormat, &options) != 0) { //start= 0.0+x,y punto partenza display
         cout<<"Error in opening the input device!";
         exit(1);
     }
@@ -579,9 +580,14 @@ int ScreenCapture::openInputVideo() {
         exit(-1);
     }
 
+    /*
+     * //Non funziona
+    av_dict_set(&options, "offset_x", x.c_str(), 0);
+    av_dict_set(&options, "offset_y", y.c_str(), 0);
+    */
     pAVInputFormat = av_find_input_format("avfoundation");
 
-    if (avformat_open_input(&pAVFormatContext, "", pAVInputFormat, &options) != 0) {
+    if (avformat_open_input(&pAVFormatContext, sta, pAVInputFormat, &options) != 0) {
         cerr << "Error in opening input device" << endl;
         exit(-1);
     }
@@ -902,7 +908,7 @@ int ScreenCapture::openInputAudio() {
     //find a free stream index
     for (i = 0; i < outAVFormatContext->nb_streams; i++) {
         if (outAVFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_UNKNOWN) {
-            outAudioStreamIndex = i;
+            outAudioStreamIndex = i;\
         }
     }
     if (outAudioStreamIndex < 0) {
@@ -915,7 +921,7 @@ int ScreenCapture::openInputAudio() {
     return 0;
 }
 
-int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool audioi) {
+int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool audioi, string xi, string yi) {
 
     string co;
 
@@ -925,6 +931,17 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     conc = co.c_str();
     audio=audioi;
     output=outputi;
+    string s;
+    s = "+"+xi+","+yi;
+    string lin;
+    lin = ":0.0" + s;
+    linSta = lin.c_str();
+    string win;
+    win = "descktop" + s;
+    winSta = win.c_str();
+    sta = s.c_str();
+    x=xi;
+    y=yi;
 
     openInputVideo();
     openInputAudio();
