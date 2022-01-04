@@ -353,12 +353,9 @@ int ScreenCapture::startAudioRecording() {
             cv_a.wait(lp, [this]() { return !pause; });
             #if defined linux
                         avformat_open_input(&pAudioFormatContext, "default", pAudioInputFormat, &audioOptions);
-            #endif
-
-            #if defined _WIN32
+            #elif defined _WIN32
 
                         avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
-
             #else
                 /*if (av_dict_set(&audioOptions, "audio_device_index", "0", 0) < 0) {
                     cerr << "Error: cannot set audio device number" << endl;
@@ -791,15 +788,14 @@ int ScreenCapture::openInputAudio() {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
-#endif
-
-#if defined _WIN32
+#elif defined _WIN32
     audioInputFormat = av_find_input_format("dshow");
     value = avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
     if (value != 0) {
         cerr << "Error in opening input device (audio)" << endl;
         exit(-1);
     }
+
 #else
 
     /*if(av_dict_set(&options,"list_devices","true",0) < 0) {
