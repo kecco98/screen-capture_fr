@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <iostream>
@@ -11,6 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 #include<thread>
+#include <queue>
 
 #define __STDC_CONSTANT_MACROS
 
@@ -124,12 +124,18 @@ private:
     std::condition_variable cv_a;
     std::condition_variable cv_t;
 
+    //Error handling
+    std::queue<std::string> error_queue;
+    std::mutex error_queue_m;
+    int terminated_threads = 0;
+    std::condition_variable error_queue_cv;
+    std::function<void(void)> make_error_handler(std::function<void(void)> f);
+
 
 public:
 
     ScreenCapture();
     ~ScreenCapture();
-    int setup(const char* output, int width, int height, const char* conc);
     int start();
     int startAudioRecording();
     int startVideoRecording();

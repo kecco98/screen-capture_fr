@@ -1,7 +1,3 @@
-//
-// Created by kecco on 30/10/21.
-//
-
 #include "ScreenCapture.h"
 #include "cstring"
 
@@ -13,7 +9,8 @@ int main()
     const char* output;
     const char* conc;
     int width, height;
-    string in2, co, x, y;
+    bool aud;
+    string in2, co, x, y, au;
     cout<<"Inserire x!"<<endl;
     cin >> x;
     cout<<"Inserire y"<<endl;
@@ -30,8 +27,16 @@ int main()
     co = to_string(width) + "x" + to_string(height);
     conc = co.c_str();
     cout<< conc;
+    cout<<"Press S or N if you want to register also the Audio"<<endl;
+    cin >> au;
 
-    video_record.openInput(width, height,output,true, x, y);
+    if (au == "S") {
+        aud=true;
+    } else {
+        aud=false;
+    }
+
+    video_record.openInput(width, height,output,aud, x, y);
     video_record.start();
 
     cout<<"\nProgram executed successfully"<<endl;
