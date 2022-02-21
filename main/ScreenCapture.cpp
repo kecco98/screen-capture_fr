@@ -12,17 +12,19 @@ ScreenCapture::ScreenCapture() : running(false), pause(false){
 ScreenCapture::~ScreenCapture(){
 
     if (av_write_trailer(outAVFormatContext) < 0) {
-        throw runtime_error{"Error in writing av trailer"};
+        cout<<"Error in writing av trailer";
+        exit(1);
+
     }
 
     avformat_close_input(&pAVFormatContext);
     if( !pAVFormatContext )
     {
-        cout<<"\nfile closed sucessfully";
+        cout<<"\nFile closed sucessfully";
     }
     else
     {
-        cout<<"\nunable to close the file";
+        cout<<"Unable to close the file";
         exit(1);
     }
 
@@ -45,8 +47,8 @@ ScreenCapture::~ScreenCapture(){
        if(pAudioFormatContext == nullptr){
            cout<<"Flie close succesfully"<<endl;
        } else {
-           cerr<<"Error: unable to close the file";
-           exit(-1);
+           cout<<"Error: unable to close the file";
+           exit(1);
        }
        //pAudioCodecContext
        // avcodec_close(pAudioCodecContext);
@@ -64,21 +66,6 @@ ScreenCapture::~ScreenCapture(){
     avformat_close_input(&outAVFormatContext);
     //avcodec_free_context(&outAudioCodecContext);
     //avcodec_free_context(&outAVCodecContext);gia fatta
-}
-
-function<void(void)> ScreenCapture::make_error_handler(function<void(void)> f) {
-    return [&]() {
-        try {
-            f();
-            lock_guard<mutex> lg{error_queue_m};
-            terminated_threads++;
-            error_queue_cv.notify_one();
-        } catch (const std::exception &e) {
-            lock_guard<mutex> lg{error_queue_m};
-            error_queue.emplace(e.what());
-            error_queue_cv.notify_one();
-        }
-    };
 }
 
 int ScreenCapture::genMenu() {

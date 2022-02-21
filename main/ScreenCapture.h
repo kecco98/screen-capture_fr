@@ -124,13 +124,6 @@ private:
     std::condition_variable cv_a;
     std::condition_variable cv_t;
 
-    //Error handling
-    std::queue<std::string> error_queue;
-    std::mutex error_queue_m;
-    int terminated_threads = 0;
-    std::condition_variable error_queue_cv;
-    std::function<void(void)> make_error_handler(std::function<void(void)> f);
-
 
 public:
 
