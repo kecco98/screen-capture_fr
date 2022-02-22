@@ -131,7 +131,7 @@ public:
     ~ScreenCapture();
     int start();
     int startAudioRecording();
-    int startVideoRecording();
+    void startVideoRecording();
     int initConvertedSamples(uint8_t*** converted_input_samples, AVCodecContext* output_codec_context, int frame_size);
     int init_fifo();
     int add_samples_to_fifo(uint8_t **converted_input_samples, const int frame_size);

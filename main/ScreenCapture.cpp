@@ -1,6 +1,6 @@
 #include <thread>
 #include "ScreenCapture.h"
-
+#include <future>
 using namespace std;
 
 ScreenCapture::ScreenCapture() : running(false), pause(false){
@@ -110,28 +110,56 @@ int ScreenCapture::start() {
     unique_lock<mutex> lr(lock_running);
 
 
-    menu= new std::thread(&ScreenCapture::genMenu,this);
+    //menu= new std::thread(&ScreenCapture::genMenu,this);
+    unique_ptr<thread> menu_thread;
+    menu_thread = make_unique<thread>([this]() {
+
+        this->genMenu();
+
+    });
 
 
     cv_s.wait(lr,[this](){return running;});
 
 
-    videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
+
+
+    unique_ptr<thread> captureVideo_thread;
+    captureVideo_thread = make_unique<thread>([this]() {
+
+            this->startVideoRecording();
+
+    });
+
+
+
+
+   // videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
+
+    unique_ptr<thread> captureAudio_thread;
     if(audio){
-        audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
+        //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
+
+        captureAudio_thread = make_unique<thread>([this]() {
+
+            this->startAudioRecording();
+
+        });
     }
 
-    videoStream->join();
+    //videoStream->join();
+    captureVideo_thread.get()->join();
     if(audio){
-        audioStream->join();
+        captureAudio_thread.get()->join();
+        //audioStream->join();
     }
-
-    menu->join();
+    menu_thread.get()->join();
+    //menu->join();
   return 1;
 
 }
 
-int ScreenCapture::startVideoRecording() {
+void ScreenCapture::startVideoRecording() {
     //https://stackoverflow.com/questions/54338342/ffmpeg-rgb-to-yuv420p-warning-data-is-not-aligned-this-can-lead-to-a-speedlo
     unique_lock<mutex> lp(lock_pause);
 
@@ -256,7 +284,7 @@ int ScreenCapture::startAudioRecording() {
 #if defined linux
     int first = 1;
     if(first==1){
-        a=0;
+        first=0;
         openInputAudio();
         streamTrail();
     }
