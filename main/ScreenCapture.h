@@ -140,10 +140,12 @@ public:
     int openInputAudio();
     int openInput(int widthi, int heighti,const char* outputi,bool audioi, std::string xi, std::string yi);
     int streamTrail();
-    /*void captureScreen(int no_frames, uint8_t *video_outbuf);
-    void scaleVideo(int no_frames , uint8_t *video_outbuf);
-    void encodeVideo(int no_frames);*/
-
+    void start_recording();
+    void pause_recording();
+    void resume_recording();
+    void terminate_recording();
+    int is_recording();
+    int is_pause();
 
 };
 

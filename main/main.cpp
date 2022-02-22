@@ -30,16 +30,15 @@ int main()
     cout<<"Press S or N if you want to register also the Audio"<<endl;
     cin >> au;
 
-    if (au == "S") {
+    if (au == "S" || au == "s") {
         aud=true;
     } else {
         aud=false;
     }
 
     video_record.openInput(width, height,output,aud, x, y);
-    video_record.start();
 
-    cout<<"\nProgram executed successfully"<<endl;
+    video_record.start();
 
     return 0;
 }
