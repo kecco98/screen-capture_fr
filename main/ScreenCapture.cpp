@@ -253,6 +253,14 @@ int ScreenCapture::startVideoRecording() {
 
 int ScreenCapture::startAudioRecording() {
     unique_lock<mutex> lp(lock_pause_audio);
+#if defined linux
+    int first = 1;
+    if(first==1){
+        a=0;
+        openInputAudio();
+        streamTrail();
+    }
+#endif
    // openInputAudio();
     int ret;
     uint8_t** resampledData;
@@ -878,10 +886,17 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     y=yi;
 
     openInputVideo();
+#if defined linux
+    if(!audio) {
+        streamTrail();
+    }
+#else
     if(audio){
         openInputAudio();
     }
     streamTrail();
+#endif
+
 
 
 

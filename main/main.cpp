@@ -27,7 +27,7 @@ int main()
     co = to_string(width) + "x" + to_string(height);
     conc = co.c_str();
     cout<< conc;
-    cout<<"Press S or N if you want to register also the Audio"<<endl;
+    cout<<"Press S or N if you want to register also the audio"<<endl;
     cin >> au;
 
     if (au == "S" || au == "s") {
