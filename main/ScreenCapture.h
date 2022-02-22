@@ -124,6 +124,9 @@ private:
     std::condition_variable cv_a;
     std::condition_variable cv_t;
 
+    std::unique_ptr<std::thread> captureAudio_thread;
+    std::unique_ptr<std::thread> captureVideo_thread;
+    bool gotFirstpacketvideo;
 
 public:
 

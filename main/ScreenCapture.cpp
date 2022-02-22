@@ -3,6 +3,8 @@
 #include <future>
 using namespace std;
 
+
+
 ScreenCapture::ScreenCapture() : running(false), pause(false){
 
     avdevice_register_all();
@@ -10,6 +12,12 @@ ScreenCapture::ScreenCapture() : running(false), pause(false){
 }
 
 ScreenCapture::~ScreenCapture(){
+    //videoStream->join();
+    captureVideo_thread.get()->join();
+    if(audio){
+        captureAudio_thread.get()->join();
+        //audioStream->join();
+    }
 
     if (av_write_trailer(outAVFormatContext) < 0) {
         cout<<"Error in writing av trailer";
@@ -108,7 +116,7 @@ int ScreenCapture::genMenu() {
 
 int ScreenCapture::start() {
     unique_lock<mutex> lr(lock_running);
-
+    gotFirstpacketvideo=false;
 
     //menu= new std::thread(&ScreenCapture::genMenu,this);
     unique_ptr<thread> menu_thread;
@@ -118,13 +126,13 @@ int ScreenCapture::start() {
 
     cv_s.wait(lr,[this](){return running;});
 
-    unique_ptr<thread> captureVideo_thread;
+  //  unique_ptr<thread> captureVideo_thread;
     captureVideo_thread = make_unique<thread>([this]() {
             this->startVideoRecording();
     });
 
    // videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
-    unique_ptr<thread> captureAudio_thread;
+   // unique_ptr<thread> captureAudio_thread;
     if(audio){
 
         openInputAudio();
@@ -135,12 +143,12 @@ int ScreenCapture::start() {
         });
     }
 
-    //videoStream->join();
+   /* //videoStream->join();
     captureVideo_thread.get()->join();
     if(audio){
         captureAudio_thread.get()->join();
         //audioStream->join();
-    }
+    }*/
     menu_thread.get()->join();
     //menu->join();
   return 1;
@@ -243,6 +251,10 @@ void ScreenCapture::startVideoRecording() {
                 // avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);//avcodec_send_frame()
                 if(avcodec_send_frame(outAVCodecContext,outFrame)>=0){
                     if(avcodec_receive_packet(outAVCodecContext,&outPacket)>=0){
+                        if(!gotFirstpacketvideo){
+
+                            gotFirstpacketvideo=true;
+                        }
                         if(outPacket.pts != AV_NOPTS_VALUE)
                             outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
                         if(outPacket.dts != AV_NOPTS_VALUE)
@@ -272,6 +284,7 @@ int ScreenCapture::startAudioRecording() {
    // openInputAudio();
     int ret;
     uint8_t** resampledData;
+    bool firstBuffer=true;
 
    // avcodec_parameters_from_context(outAVFormatContext->streams[outAudioStreamIndex]->codecpar, outAudioCodecContext);
     init_fifo();
@@ -425,11 +438,19 @@ int ScreenCapture::startAudioRecording() {
                     outPacket->stream_index = outAudioStreamIndex;
 
                     lock_sf.lock();
-
-                    if (av_write_frame(outAVFormatContext, outPacket) != 0)
+                    if (gotFirstpacketvideo) {
+                        if (!firstBuffer) {
+                            if (av_write_frame(outAVFormatContext, outPacket) != 0) {
+                                throw runtime_error("Error in writing audio frame");
+                            }
+                        } else {
+                            firstBuffer = false;
+                        }
+                    }
+                 /*   if (av_write_frame(outAVFormatContext, outPacket) != 0)
                     {
                         cerr << "Error in writing audio frame" << endl;
-                    }
+                    }*/
                     lock_sf.unlock();
                     av_packet_unref(outPacket);
                 }
