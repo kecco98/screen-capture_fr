@@ -113,37 +113,22 @@ int ScreenCapture::start() {
     //menu= new std::thread(&ScreenCapture::genMenu,this);
     unique_ptr<thread> menu_thread;
     menu_thread = make_unique<thread>([this]() {
-
         this->genMenu();
-
     });
-
 
     cv_s.wait(lr,[this](){return running;});
 
-
-
-
     unique_ptr<thread> captureVideo_thread;
     captureVideo_thread = make_unique<thread>([this]() {
-
             this->startVideoRecording();
-
     });
 
-
-
-
    // videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
-
     unique_ptr<thread> captureAudio_thread;
     if(audio){
         //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
-
         captureAudio_thread = make_unique<thread>([this]() {
-
             this->startAudioRecording();
-
         });
     }
 
@@ -281,14 +266,6 @@ void ScreenCapture::startVideoRecording() {
 
 int ScreenCapture::startAudioRecording() {
     unique_lock<mutex> lp(lock_pause_audio);
-#if defined linux
-    int first = 1;
-    if(first==1){
-        first=0;
-        openInputAudio();
-        streamTrail();
-    }
-#endif
    // openInputAudio();
     int ret;
     uint8_t** resampledData;
@@ -914,19 +891,10 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     y=yi;
 
     openInputVideo();
-#if defined linux
-    if(!audio) {
-        streamTrail();
-    }
-#else
     if(audio){
         openInputAudio();
     }
     streamTrail();
-#endif
-
-
-
 
     return 0;
 }
