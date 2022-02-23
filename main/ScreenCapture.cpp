@@ -135,8 +135,8 @@ int ScreenCapture::start() {
    // unique_ptr<thread> captureAudio_thread;
     if(audio){
 
-        openInputAudio();
-        streamTrail();
+        //openInputAudio();
+        //streamTrail();
         //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
         captureAudio_thread = make_unique<thread>([this]() {
             this->startAudioRecording();
@@ -915,15 +915,19 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     y=yi;
 
     openInputVideo();
+    if(audio){
+        openInputAudio();
+    }
+    streamTrail();
 
 /*    if(audio){
         openInputAudio();
     }*/
 
-    if(!audio){
+   /* if(!audio){
         streamTrail();
 
-    }
+    }*/
     //streamTrail();
 
     return 0;
