@@ -63,7 +63,7 @@ ScreenCapture::~ScreenCapture(){
        //av_free(pAudioCodecContext);
        avcodec_free_context(&pAudioCodecContext);
        if(pAudioCodecContext == nullptr){
-           cout<<"\nFilie close succesfully"<<endl;
+           cout<<"\nFile close succesfully"<<endl;
        } else {
            cerr<<"Error: unable to close the file";
            exit(-1);
@@ -74,6 +74,21 @@ ScreenCapture::~ScreenCapture(){
     avformat_close_input(&outAVFormatContext);
     //avcodec_free_context(&outAudioCodecContext);
     //avcodec_free_context(&outAVCodecContext);gia fatta
+}
+
+function<void(void)> ScreenCapture::make_error_handler(function<void(void)> f) {
+    return [&]() {
+        try {
+            f();
+            lock_guard<mutex> lg{error_queue_m};
+            terminated_threads++;
+            error_queue_cv.notify_one();
+        } catch (const std::exception &e) {
+            lock_guard<mutex> lg{error_queue_m};
+            error_queue.emplace(e.what());
+            error_queue_cv.notify_one();
+        }
+    };
 }
 
 int ScreenCapture::genMenu() {
@@ -121,17 +136,25 @@ int ScreenCapture::start() {
     //menu= new std::thread(&ScreenCapture::genMenu,this);
     unique_ptr<thread> menu_thread;
     menu_thread = make_unique<thread>([this]() {
-        this->genMenu();
+        this->make_error_handler([this]() {
+            this->genMenu();
+        })();
     });
+
+
 
     cv_s.wait(lr,[this](){return running;});
 
   //  unique_ptr<thread> captureVideo_thread;
-    captureVideo_thread = make_unique<thread>([this]() {
+    captureVideo_thread = make_unique<thread>([this]()  {
+        this->make_error_handler([this]() {
             this->startVideoRecording();
+        })();
     });
 
-   // videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);
+
+
+   // videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);0
    // unique_ptr<thread> captureAudio_thread;
     if(audio){
 
@@ -139,8 +162,24 @@ int ScreenCapture::start() {
         streamTrail();
         //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
         captureAudio_thread = make_unique<thread>([this]() {
-            this->startAudioRecording();
+            this->make_error_handler([this]() {
+                this->startAudioRecording();
+            })();
         });
+
+    }
+
+    unique_lock<mutex> error_queue_ul{error_queue_m};
+    error_queue_cv.wait(error_queue_ul, [&]() { return (!error_queue.empty() || terminated_threads == (audio ? 3 : 2)); });
+    if (!error_queue.empty()) {
+        this->terminate_recording();
+        string error_message = error_queue.front();
+        error_queue.pop();
+        while (!error_queue.empty()) {
+            error_message += string{"\n"} + error_queue.front();
+            error_queue.pop();
+        }
+        throw runtime_error{error_message};
     }
 
    /* //videoStream->join();

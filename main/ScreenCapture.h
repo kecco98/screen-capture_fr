@@ -128,6 +128,13 @@ private:
     std::unique_ptr<std::thread> captureVideo_thread;
     bool gotFirstpacketvideo;
 
+    //errors handling
+    std::queue<std::string> error_queue;
+    std::mutex error_queue_m;
+    int terminated_threads = 0;
+    std::condition_variable error_queue_cv;
+    std::function<void(void)> make_error_handler(std::function<void(void)> f);
+
 public:
 
     ScreenCapture();
