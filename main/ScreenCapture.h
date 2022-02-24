@@ -148,7 +148,7 @@ public:
     int genMenu();
     int openInputVideo();
     int openInputAudio();
-    int openInput(int widthi, int heighti,const char* outputi,bool audioi, std::string xi, std::string yi);
+    int openInput(int widthi, int heighti, std::string outputi,bool audioi, std::string xi, std::string yi);
     int streamTrail();
     void start_recording();
     void pause_recording();

@@ -6,12 +6,11 @@ using namespace std;
 /* Main function to run the application */
 int main()
 {
-    const char* output;
     const char* conc;
     int width, height;
     bool aud;
     ScreenCapture video_record;
-    string in2, co, x, y, au;
+    string in2, co, x, y, au, output;
 
     //Taking screen starting point parameters
     cout<<"Inserire x!"<<endl;
@@ -21,9 +20,7 @@ int main()
 
     //Taking output file name
     cout<<"Insert the output patch!"<<endl;
-    cin >> in2;
-    in2="../media_output/"+in2+".mp4";
-    output=in2.c_str();
+    cin >> output;
 
     //Taking width and heigth parameters
     cout<<"Insert the width of the window you want to record!"<<endl;

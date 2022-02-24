@@ -923,7 +923,7 @@ int ScreenCapture::openInputAudio() {
     return 0;
 }
 
-int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool audioi, string xi, string yi) {
+int ScreenCapture::openInput(int widthi, int heighti, string outputi,bool audioi, string xi, string yi) {
 
         //Coping values in global variables.
     string co;
@@ -932,7 +932,9 @@ int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool au
     co = to_string(width) + "x" + to_string(height);
     conc = co.c_str();
     audio=audioi;
-    output=outputi;
+    string o="../media_output/"+outputi+".mp4";
+    output=o.c_str();
+    cout<<output<<endl;
     string s;
     s = "+"+xi+","+yi;
     string lin;
