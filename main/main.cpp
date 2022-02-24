@@ -47,12 +47,41 @@ int main()
                     video_record.openInput(width, height,output,aud, x, y);
                     video_record.start();
                 }};
-        auto menu_thread = thread{
+  /*      auto menu_thread = thread{
                 [&]() {
                         video_record.genMenu();
-                }};
+                }};*/
+
+
+        char s;
+        char p;
+        char r;
+        bool running =true;
+        bool pause=false;
+        cout<<"Is recording!"<<endl;
+        //cin>>s;
+        //this->start();
+        while(running){
+            cin>>p;
+            if(p=='p'){
+                video_record.pause_recording();
+                pause=true;
+                while(pause){
+                    cin>>r;
+                    if(r=='r'){
+                        video_record.resume_recording();
+                        pause=false;
+                    }
+                }
+            } else if(p=='t'){
+                running=false;
+                video_record.terminate_recording();
+            }
+        }
+
+
         open_thread.join();
-        menu_thread.join();
+       /* menu_thread.join();*/
     } catch (const std::exception& e) {
         std::cerr << e.what() << endl;
         cout << "There was an error in the library" << endl;

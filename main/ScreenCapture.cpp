@@ -100,8 +100,8 @@ int ScreenCapture::genMenu() {
     char r;
 
     cout<<"Write s if you want to start!"<<endl;
-    cin>>s;
-    this->start_recording();
+    //cin>>s;
+    //this->start();
     while(running){
         cin>>p;
         if(p=='p'){
@@ -134,8 +134,9 @@ int ScreenCapture::start() {
     });*/
 
 
+    running=true;
 
-    cv_s.wait(lr,[this](){return running;});
+    //cv_s.wait(lr,[this](){return running;});
 
   //  unique_ptr<thread> captureVideo_thread;
     captureVideo_thread = make_unique<thread>([this]()  {
@@ -149,8 +150,8 @@ int ScreenCapture::start() {
    // unique_ptr<thread> captureAudio_thread;
     if(audio){
 
-        openInputAudio();
-        streamTrail();
+        //openInputAudio();
+        //streamTrail();
         //audioStream = new std::thread(&ScreenCapture::startAudioRecording,this);
         captureAudio_thread = make_unique<thread>([this]() {
             this->make_error_handler([this]() {
@@ -949,15 +950,16 @@ int ScreenCapture::openInput(int widthi, int heighti, string outputi,bool audioi
 
     openInputVideo();
 
-/*    if(audio){
+     if(audio){
         openInputAudio();
-    }*/
-
-    if(!audio){
-        streamTrail();
     }
-    //streamTrail();
 
+    /*if(!audio){
+        streamTrail();
+    }*/
+    streamTrail();
+   // openInputAudio();
+   // streamTrail();
     return 0;
 }
 
@@ -969,7 +971,7 @@ int ScreenCapture::streamTrail(){
         throw runtime_error("Error in writing the header context");
     }
 
-    cout<<"\n\nOutput file information :\n\n";
+    cout<<"\n\nOutput file information :\n\n"<<output;
     av_dump_format(outAVFormatContext , 0 ,output ,1);
 }
 

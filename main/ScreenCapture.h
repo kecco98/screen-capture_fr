@@ -11,6 +11,7 @@
 #include <condition_variable>
 #include<thread>
 #include <queue>
+#include <functional>
 
 #define __STDC_CONSTANT_MACROS
 
