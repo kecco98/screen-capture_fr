@@ -13,7 +13,8 @@ ScreenCapture::ScreenCapture() : running(false), pause(false){
 
 ScreenCapture::~ScreenCapture(){
     //videoStream->join();
-    captureVideo_thread.get()->join();
+    /*
+     *     captureVideo_thread.get()->join();
     if(audio){
         captureAudio_thread.get()->join();
         //audioStream->join();
@@ -36,44 +37,46 @@ ScreenCapture::~ScreenCapture(){
         exit(1);
     }
 
-   /* avformat_free_context(pAVFormatContext);
-    avformat_free_context(pAudioFormatContext);
-    avformat_free_context(outAVFormatContext);
-    if( !pAudioFormatContext && !pAVFormatContext && !outAudioCodecContext)
-    {
-        cout<<"\navformat free successfully";
+   // avformat_free_context(pAVFormatContext);
+    //avformat_free_context(pAudioFormatContext);
+    //avformat_free_context(outAVFormatContext);
+    //if( !pAudioFormatContext && !pAVFormatContext && !outAudioCodecContext)
+    //{
+      //  cout<<"\navformat free successfully";
+   // }
+    //else
+    //{
+     //   cout<<"\nunable to free avformat context";
+      //  exit(1);
+    //}
+
+    if(audio) {
+
+        avformat_close_input(&pAudioFormatContext);
+        if(pAudioFormatContext == nullptr){
+            cout<<"Audio file closed succesfully"<<endl;
+        } else {
+            cout<<"Error: unable to close the file";
+            exit(1);
+        }
+        //pAudioCodecContext
+        // avcodec_close(pAudioCodecContext);
+        //av_free(pAudioCodecContext);
+        avcodec_free_context(&pAudioCodecContext);
+        if(pAudioCodecContext == nullptr){
+            cout<<"Audio file closed succesfully"<<endl;
+        } else {
+            cerr<<"Error: unable to close the file";
+            exit(-1);
+        }
     }
-    else
-    {
-        cout<<"\nunable to free avformat context";
-        exit(1);
-    }*/
-
-   if(audio) {
-
-       avformat_close_input(&pAudioFormatContext);
-       if(pAudioFormatContext == nullptr){
-           cout<<"Audio file closed succesfully"<<endl;
-       } else {
-           cout<<"Error: unable to close the file";
-           exit(1);
-       }
-       //pAudioCodecContext
-       // avcodec_close(pAudioCodecContext);
-       //av_free(pAudioCodecContext);
-       avcodec_free_context(&pAudioCodecContext);
-       if(pAudioCodecContext == nullptr){
-           cout<<"Audio file closed succesfully"<<endl;
-       } else {
-           cerr<<"Error: unable to close the file";
-           exit(-1);
-       }
-   }
-   // avcodec_free_context(&pAVCodecContext); gia fatta
+    // avcodec_free_context(&pAVCodecContext); gia fatta
 
     avformat_close_input(&outAVFormatContext);
     //avcodec_free_context(&outAudioCodecContext);
     //avcodec_free_context(&outAVCodecContext);gia fatta
+     */
+
 }
 
 function<void(void)> ScreenCapture::make_error_handler(function<void(void)> f) {
@@ -98,31 +101,20 @@ int ScreenCapture::genMenu() {
 
     cout<<"Write s if you want to start!"<<endl;
     cin>>s;
-    running=true;
-    cv_s.notify_all();
-    cout<<"Recording is runnig!"<<endl;
-    cout<<"- write p to pause the recording"<<endl;
-    cout<<"- write t to terminate the recording"<<endl;
+    this->start_recording();
     while(running){
         cin>>p;
         if(p=='p'){
-            //pausa
-            pause=true;
-            cout<<"Recording in pause!"<<endl;
-            cout<<"- write r to restart the recording"<<endl;
+            this->pause_recording();
             while(pause){
                 cin>>r;
                 if(r=='r'){
-                    pause=false;
-                    cv_v.notify_all();
-                    cv_a.notify_all();
-                    cout<<"Restart recording!"<<endl;
+                   this->resume_recording();
 
                 }
             }
         } else if(p=='t'){
-            running=false;
-            cout<<"Recording terminated"<<endl;
+            this->terminate_recording();
         }
     }
 
@@ -134,12 +126,12 @@ int ScreenCapture::start() {
     gotFirstpacketvideo=false;
 
     //menu= new std::thread(&ScreenCapture::genMenu,this);
-    unique_ptr<thread> menu_thread;
+    /*unique_ptr<thread> menu_thread;
     menu_thread = make_unique<thread>([this]() {
         this->make_error_handler([this]() {
             this->genMenu();
         })();
-    });
+    });*/
 
 
 
@@ -169,7 +161,7 @@ int ScreenCapture::start() {
     }
 
     unique_lock<mutex> error_queue_ul{error_queue_m};
-    error_queue_cv.wait(error_queue_ul, [&]() { return (!error_queue.empty() || terminated_threads == (audio ? 3 : 2)); });
+    error_queue_cv.wait(error_queue_ul, [&]() { return (!error_queue.empty() || terminated_threads == (audio ? 2 : 1)); });
     if (!error_queue.empty()) {
         this->terminate_recording();
         string error_message = error_queue.front();
@@ -187,7 +179,7 @@ int ScreenCapture::start() {
         captureAudio_thread.get()->join();
         //audioStream->join();
     }*/
-    menu_thread.get()->join();
+    //menu_thread.get()->join();
     //menu->join();
   return 1;
 
@@ -773,7 +765,7 @@ int ScreenCapture::openInputVideo() {
 
     if(!outAVFormatContext->nb_streams)
     {
-        throw logic_error("Output file dose not contain any stream");
+        throw logic_error("Output file does not contain any stream");
     }
 
 
@@ -790,7 +782,7 @@ int ScreenCapture::openInputAudio() {
 
     pAudioFormatContext = avformat_alloc_context();
     if(pAudioFormatContext==nullptr){
-        cerr << "Error: paudiocontext" << endl;
+        throw runtime_error("Error: paudiocontext");
     }
     if ( av_dict_set(&audioOptions, "sample_rate", "44100", 0) < 0) {
         throw runtime_error("Error: cannot set audio sample rate");
@@ -813,6 +805,7 @@ int ScreenCapture::openInputAudio() {
         throw runtime_error("Error in opening input device (audio)");
     }
 #elif defined _WIN32
+
     audioInputFormat = av_find_input_format("dshow");
     value = avformat_open_input(&inAudioFormatContext, "audio=Microfono (Realtek(R) Audio)", audioInputFormat, &audioOptions);
     if (value != 0) {
@@ -932,8 +925,8 @@ int ScreenCapture::openInputAudio() {
 
 int ScreenCapture::openInput(int widthi, int heighti,const char* outputi,bool audioi, string xi, string yi) {
 
+        //Coping values in global variables.
     string co;
-
     width= widthi;
     height= heighti;
     co = to_string(width) + "x" + to_string(height);
@@ -981,33 +974,75 @@ int ScreenCapture::streamTrail(){
 void ScreenCapture::start_recording(){
     running=true;
     cv_s.notify_all();
+    cout<<"Recording!"<<endl;
+    cout<<"- write p to pause the recording"<<endl;
+    cout<<"- write t to terminate the recording"<<endl;
 }
 void ScreenCapture::pause_recording(){
     pause=true;
+    cout<<"Recording in pause!"<<endl;
+    cout<<"- write r to restart the recording"<<endl;
 }
 
 void ScreenCapture::resume_recording(){
     pause=false;
     cv_v.notify_all();
     cv_a.notify_all();
+    cout<<"Recording restarted!"<<endl;
 }
 
 void ScreenCapture::terminate_recording(){
     running=false;
-}
-
-int ScreenCapture::is_recording() {
-    if(running){
-        return 1;
-    } else {
-        return 0;
+    captureVideo_thread.get()->join();
+    if(audio){
+        captureAudio_thread.get()->join();
+        //audioStream->join();
     }
-}
 
-int ScreenCapture::is_pause() {
-    if(pause){
-        return 1;
-    } else {
-        return 0;
+    if (av_write_trailer(outAVFormatContext) < 0) {
+        throw runtime_error("Error in writing av trailer");
+
     }
+
+    avformat_close_input(&pAVFormatContext);
+    if( pAVFormatContext != nullptr ) {
+        throw runtime_error("Unable to close the file");
+    }
+
+    /* avformat_free_context(pAVFormatContext);
+     avformat_free_context(pAudioFormatContext);
+     avformat_free_context(outAVFormatContext);
+     if( !pAudioFormatContext && !pAVFormatContext && !outAudioCodecContext)
+     {
+         cout<<"\navformat free successfully";
+     }
+     else
+     {
+         cout<<"\nunable to free avformat context";
+         exit(1);
+     }*/
+
+    if(audio) {
+
+        avformat_close_input(&pAudioFormatContext);
+        if(pAudioFormatContext != nullptr){
+            throw runtime_error("Error: unable to close the file audio");
+        }
+        //pAudioCodecContext
+        // avcodec_close(pAudioCodecContext);
+        //av_free(pAudioCodecContext);
+        avcodec_free_context(&pAudioCodecContext);
+        if(pAudioCodecContext != nullptr){
+            throw runtime_error("Error: unable to close the file audio");
+        }
+    }
+    // avcodec_free_context(&pAVCodecContext); gia fatta
+
+    avformat_close_input(&outAVFormatContext);
+    if(outAVFormatContext != nullptr){
+        throw runtime_error("Error: unable to close the file");
+    }
+    //avcodec_free_context(&outAudioCodecContext);
+    //avcodec_free_context(&outAVCodecContext);gia fatta
+    cout<<"Recording terminated"<<endl;
 }
