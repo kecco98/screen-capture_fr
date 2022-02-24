@@ -36,9 +36,16 @@ int main()
         aud=false;
     }
 
-    video_record.openInput(width, height,output,aud, x, y);
+    try{
+        video_record.openInput(width, height,output,aud, x, y);
+        video_record.start();
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << endl;
+        cout << "There was an error in the library" << endl;
+        video_record.terminate_recording();
+    }
 
-    video_record.start();
+
 
     return 0;
 }

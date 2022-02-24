@@ -28,7 +28,7 @@ ScreenCapture::~ScreenCapture(){
     avformat_close_input(&pAVFormatContext);
     if( !pAVFormatContext )
     {
-        cout<<"\nFile closed sucessfully";
+        cout<<"\nVideo file closed sucessfully"<<endl;
     }
     else
     {
@@ -53,7 +53,7 @@ ScreenCapture::~ScreenCapture(){
 
        avformat_close_input(&pAudioFormatContext);
        if(pAudioFormatContext == nullptr){
-           cout<<"\nFile close succesfully"<<endl;
+           cout<<"Audio file closed succesfully"<<endl;
        } else {
            cout<<"Error: unable to close the file";
            exit(1);
@@ -63,7 +63,7 @@ ScreenCapture::~ScreenCapture(){
        //av_free(pAudioCodecContext);
        avcodec_free_context(&pAudioCodecContext);
        if(pAudioCodecContext == nullptr){
-           cout<<"\nFile close succesfully"<<endl;
+           cout<<"Audio file closed succesfully"<<endl;
        } else {
            cerr<<"Error: unable to close the file";
            exit(-1);
@@ -151,7 +151,6 @@ int ScreenCapture::start() {
             this->startVideoRecording();
         })();
     });
-
 
 
    // videoStream = new std::thread(&ScreenCapture::startVideoRecording,this);0
