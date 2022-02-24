@@ -146,17 +146,13 @@ public:
     int initConvertedSamples(uint8_t*** converted_input_samples, AVCodecContext* output_codec_context, int frame_size);
     int init_fifo();
     int add_samples_to_fifo(uint8_t **converted_input_samples, const int frame_size);
-    int genMenu();
     int openInputVideo();
     int openInputAudio();
     int openInput(int widthi, int heighti, std::string outputi,bool audioi, std::string xi, std::string yi);
     int streamTrail();
-    void start_recording();
     void pause_recording();
     void resume_recording();
     void terminate_recording();
-    int is_recording();
-    int is_pause();
 
 };
 

@@ -59,6 +59,8 @@ int main()
         bool running =true;
         bool pause=false;
         cout<<"Is recording!"<<endl;
+        cout<<"- write p to pause the recording"<<endl;
+        cout<<"- write t to terminate the recording"<<endl;
         //cin>>s;
         //this->start();
         while(running){
@@ -66,16 +68,20 @@ int main()
             if(p=='p'){
                 video_record.pause_recording();
                 pause=true;
+                cout<<"Recording in pause!"<<endl;
+                cout<<"- write r to restart the recording"<<endl;
                 while(pause){
                     cin>>r;
                     if(r=='r'){
                         video_record.resume_recording();
                         pause=false;
+                        cout<<"Recording restarted!"<<endl;
                     }
                 }
             } else if(p=='t'){
                 running=false;
                 video_record.terminate_recording();
+                cout<<"Recording terminated"<<endl;
             }
         }
 

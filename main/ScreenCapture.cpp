@@ -94,33 +94,6 @@ function<void(void)> ScreenCapture::make_error_handler(function<void(void)> f) {
     };
 }
 
-int ScreenCapture::genMenu() {
-    char s;
-    char p;
-    char r;
-
-    cout<<"Write s if you want to start!"<<endl;
-    //cin>>s;
-    //this->start();
-    while(running){
-        cin>>p;
-        if(p=='p'){
-            this->pause_recording();
-            while(pause){
-                cin>>r;
-                if(r=='r'){
-                   this->resume_recording();
-
-                }
-            }
-        } else if(p=='t'){
-            this->terminate_recording();
-        }
-    }
-
-    return 0;
-}
-
 int ScreenCapture::start() {
     unique_lock<mutex> lr(lock_running);
     gotFirstpacketvideo=false;
@@ -975,24 +948,15 @@ int ScreenCapture::streamTrail(){
     av_dump_format(outAVFormatContext , 0 ,output ,1);
 }
 
-void ScreenCapture::start_recording(){
-    running=true;
-    cv_s.notify_all();
-    cout<<"Recording!"<<endl;
-    cout<<"- write p to pause the recording"<<endl;
-    cout<<"- write t to terminate the recording"<<endl;
-}
 void ScreenCapture::pause_recording(){
     pause=true;
-    cout<<"Recording in pause!"<<endl;
-    cout<<"- write r to restart the recording"<<endl;
 }
 
 void ScreenCapture::resume_recording(){
     pause=false;
     cv_v.notify_all();
     cv_a.notify_all();
-    cout<<"Recording restarted!"<<endl;
+
 }
 
 void ScreenCapture::terminate_recording(){
@@ -1048,5 +1012,5 @@ void ScreenCapture::terminate_recording(){
     }
     //avcodec_free_context(&outAudioCodecContext);
     //avcodec_free_context(&outAVCodecContext);gia fatta
-    cout<<"Recording terminated"<<endl;
+
 }
