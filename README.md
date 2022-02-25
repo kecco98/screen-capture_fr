@@ -34,8 +34,8 @@ It offers the following features:
 
 The main functions that can be called to achieve the previous features are:
 
-- **openInput**: It takes as parameters all the settings for the recording as **width**, **height**, **output file name**, **audio**, that can be true or false, and **x** and **y** to specify the position of the staring point of the area to record on the screen. 
- the function internally calls the **openInputAudio** and **openInputVideo** to set up the input devices for audio and video according to the given parameters.
+- **openInput**: It takes as parameters all the settings for the recording as: **width**, **height**, **output file name**, **audio**, that can be true or false, and **x** and **y** to specify the position of the staring point of the area to record on the screen. 
+ The function internally calls the **openInputAudio** and **openInputVideo** to set up the input devices for audio and video according to the given parameters.
 - **start**: It starts the recording process creating the two different threads, one for the audio and one for the video. 
 - **pause_recording**: It pauses de recording.
 - **resume_recording**: It resumes a recording that had been paused.
