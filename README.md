@@ -32,6 +32,15 @@ It offers the following features:
 - Record **screen video** with or without **microphone audio**
 - In case of **errors** throws an **exception** with a **description of the error** and **stop the registration** in a good way, creating the output file using what has been recorded till that moment.
 
+The main functions that can be called to achieve the previous features are:
+
+- **openInput**: It takes as parameters all the settings for the recording as **width**, **height**, **output file name**, **audio**, that can be true or false, and **x** and **y** to specify the position of the staring point of the area to record on the screen. 
+ the function internally calls the **openInputAudio** and **openInputVideo** to set up the input devices for audio and video according to the given parameters.
+- **start**: It starts the recording process creating the two different threads, one for the audio and one for the video. 
+- **pause_recording**: It pauses de recording.
+- **resume_recording**: It resumes a recording that had been paused.
+- **terminate_recording**: It terminates the recording and closes the created output file.
+
 ### QT Application
 
 Allow to use the **ScreenCapture library**, offering a **GUI** to set the **parameters** and to give **commands**.
@@ -42,12 +51,9 @@ Allow to use the **ScreenCapture library**, offering a **GUI** to set the **para
 
 ### Running Library
 **ScreenCapture library** can be used also without the GUI,
-in the "legacy" version is possible to record a video using the terminal window.
-
-The user is asked to insert all the parameters and then can control the actions using:
-- [p] to pause
-- [r] to resume
-- [t] to terminate
+in the "legacy" version is possible to record a video using the terminal window where is shown 
+a menu, implemented in the main, where the user is asked to insert all the parameters 
+and then can control the actions to pause, resume and terminate the recording.
 
 ---
 
