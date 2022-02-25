@@ -807,7 +807,6 @@ void ScreenCapture::terminate_recording(){
         throw runtime_error("Error in writing av trailer");
 
     }
-   // cout<<"File saved in "<<output;----------------------------------------------------------------------------------------
 
     avformat_close_input(&pAVFormatContext);
     if( pAVFormatContext != nullptr ) {
