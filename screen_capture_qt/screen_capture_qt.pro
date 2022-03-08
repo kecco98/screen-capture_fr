@@ -29,7 +29,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-unix:LIBS += -lavformat -lavcodec -lavutil -lavdevice -lswscale -lX11 -lpthread -lswresample
+linux:LIBS += -lavformat -lavcodec -lavutil -lavdevice -lswscale -lX11 -lpthread -lswresample
 
 
 win32:INCLUDEPATH += $$PWD/../include

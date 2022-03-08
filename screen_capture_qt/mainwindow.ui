@@ -268,7 +268,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>70</x>
       <y>320</y>
       <width>141</width>
       <height>17</height>
@@ -278,6 +278,31 @@
      <string>no recording</string>
     </property>
    </widget>
+   <widget class="QLabel" name="recordImage">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>310</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>100</width>
+      <height>100</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>recordbutton.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -285,7 +310,7 @@
      <x>0</x>
      <y>0</y>
      <width>388</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuscreen_capture">

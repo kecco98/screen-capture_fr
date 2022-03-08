@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->ResumeButton->hide();
            ui->pushButton_2->hide();
            ui->pushButton_3->hide();
+           ui->recordImage->hide();
 
 }
 
@@ -90,6 +91,7 @@ void MainWindow::on_pushButton_clicked()
             ui->pushButton->show();
             ui->ResumeButton->hide();
                ui->pushButton_2->hide();
+               ui->recordImage->hide();
                ui->pushButton_3->hide();
              ui->status->setText("terminate");
         }
@@ -98,7 +100,7 @@ void MainWindow::on_pushButton_clicked()
 
        ui->pushButton_3->show();
         ui->pushButton_2->show();
-
+        ui->recordImage->show();
 }
 
 
@@ -108,6 +110,7 @@ void MainWindow::on_pushButton_2_clicked()
     ui->pushButton->show();
     ui->ResumeButton->hide();
        ui->pushButton_2->hide();
+       ui->recordImage->hide();
        ui->pushButton_3->hide();
      ui->status->setText("terminate");
 
@@ -121,6 +124,7 @@ void MainWindow::on_ResumeButton_clicked()
      ui->pushButton_3->show();
      ui->ResumeButton->hide();
      ui->pushButton_2->show();
+     ui->recordImage->show();
 }
 
 
@@ -131,5 +135,6 @@ void MainWindow::on_pushButton_3_clicked()
      ui->ResumeButton->show();
      ui->pushButton_3->hide();
      ui->pushButton_2->hide();
+     ui->recordImage->hide();
 }
 
